@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Immortalize - How It Works</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-secondary: #666;
+      --text-dim: #999;
+      --primary: #6366f1;
+      --primary-light: #eef2ff;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    strong {
+      color: var(--text);
+    }
+
+    a {
+      color: var(--primary);
+    }
+
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 0.875em;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    .keyword { color: #c586c0; }
+    .string { color: #ce9178; }
+    .comment { color: #6a9955; }
+    .number { color: #b5cea8; }
+    .function { color: #dcdcaa; }
+
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .callout {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .callout strong {
+      color: var(--primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    .step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content h4 {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-content p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--text-dim);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">~</div>
+        Immortalize
+      </a>
+      <nav>
+        <a href="index.html">App</a>
+        <a href="verify.html">Verify</a>
+        <a href="docs.html">Docs</a>
+      </nav>
+    </header>
+
+    <h1>How Immortalize Works</h1>
+    <p class="subtitle">
+      Permanent proof of your Nostr notes, anchored to Bitcoin using Blocktrails.
+    </p>
+
+    <h2>The Problem</h2>
+    <p>
+      Nostr is decentralized, but your notes still depend on <strong>relays</strong> to exist.
+      Relays can go offline. They can delete your notes. There's no permanent, trustless
+      proof that you posted something at a specific time.
+    </p>
+    <p>
+      Traditional timestamping services require trust. You're relying on someone else's
+      database, their signature, their continued existence.
+    </p>
+
+    <h2>The Solution: Blocktrails</h2>
+    <p>
+      <strong>Blocktrails</strong> anchors data to Bitcoin using cryptographic key tweaking.
+      Instead of embedding data in <code>OP_RETURN</code>, we use the data itself to derive
+      a Bitcoin address. If the address has funds, the data existed at that block height.
+    </p>
+
+    <div class="callout">
+      <p>
+        <strong>Key insight:</strong> Your Nostr private key can directly control a Blocktrail.
+        Same secp256k1 curve. No key conversion needed.
+      </p>
+    </div>
+
+    <h3>How Key Tweaking Works</h3>
+    <p>
+      The math is simple but powerful:
+    </p>
+
+    <pre><code><span class="comment">// For each state you want to anchor:</span>
+tweak = SHA256(state) <span class="keyword">mod</span> n       <span class="comment">// Hash your data to get a scalar</span>
+new_privkey = old_privkey + tweak  <span class="comment">// Add tweak to your private key</span>
+new_pubkey = old_pubkey + tweak*G  <span class="comment">// Corresponding public key</span>
+
+<span class="comment">// The new public key becomes a P2TR (Taproot) address</span>
+address = bech32m(new_pubkey)      <span class="comment">// bc1p... or tb1p...</span></code></pre>
+
+    <p>
+      When you send Bitcoin to this address, you're creating an on-chain commitment
+      that this specific data existed at this specific time.
+    </p>
+
+    <h3>Visual Flow</h3>
+
+    <div class="diagram">
+┌─────────────────────────────────────────────────────────────────┐
+│                         IMMORTALIZE FLOW                        │
+└─────────────────────────────────────────────────────────────────┘
+
+  Nostr Note                    Your Key                  Bitcoin
+  ──────────                    ────────                  ───────
+
+  ┌──────────────┐
+  │ note1abc...  │
+  │              │
+  │ "Hello Nostr"│
+  │ by: npub1... │
+  │ at: 17053... │
+  └──────┬───────┘
+         │
+         ▼
+  ┌──────────────┐         ┌──────────────┐
+  │  Canonical   │         │  Your Nostr  │
+  │    Hash      │         │  Private Key │
+  │              │         │              │
+  │ SHA256(...)  │         │  nsec1...    │
+  │ = 0x7f3a... │         │  = 0x1a2b... │
+  └──────┬───────┘         └──────┬───────┘
+         │                        │
+         │    ┌───────────────────┘
+         │    │
+         ▼    ▼
+  ┌──────────────────────┐
+  │   Key Tweaking       │
+  │                      │
+  │  tweak = hash mod n  │
+  │  new_key = key+tweak │
+  └──────────┬───────────┘
+             │
+             ▼
+  ┌──────────────────────┐         ┌──────────────┐
+  │   P2TR Address       │────────▶│   Bitcoin    │
+  │                      │ send tx │   Block      │
+  │   tb1pxyz...         │         │   #200000    │
+  └──────────────────────┘         └──────┬───────┘
+                                          │
+                                          ▼
+                                   ┌──────────────┐
+                                   │   TXO URI    │
+                                   │              │
+                                   │ txo:testnet4:│
+                                   │ abc123...:0  │
+                                   │              │
+                                   └──────────────┘</div>
+
+    <h2>Step by Step</h2>
+
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h4>Fetch your Nostr note</h4>
+        <p>We retrieve the note from Nostr relays and verify its signature.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h4>Compute the canonical hash</h4>
+        <p>
+          Following NIP-01, we serialize the note as
+          <code>[0, pubkey, created_at, kind, tags, content]</code>
+          and SHA256 hash it. This is deterministic—anyone can recompute it.
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h4>Derive the anchor address</h4>
+        <p>
+          Using your Nostr key, we tweak it with the note hash to generate a unique
+          P2TR address. This address is mathematically derived from your identity + the note.
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <h4>Create the Bitcoin transaction</h4>
+        <p>
+          A small amount of Bitcoin is sent to this derived address. The transaction
+          is broadcast to the network and included in a block.
+        </p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">5</div>
+      <div class="step-content">
+        <h4>Generate the TXO URI</h4>
+        <p>
+          The proof is a simple URI: <code>txo:chain:address/block</code>.
+          Anyone can verify this exists on the blockchain.
+        </p>
+      </div>
+    </div>
+
+    <h2>Verification</h2>
+    <p>
+      To verify an immortalization, anyone can:
+    </p>
+    <ol>
+      <li>Fetch the original Nostr note</li>
+      <li>Recompute its canonical hash</li>
+      <li>Derive what the P2TR address should be (given the author's pubkey)</li>
+      <li>Check that this address received funds at the claimed block height</li>
+    </ol>
+    <p>
+      If all checks pass, the note provably existed at that point in time. No trust required.
+    </p>
+
+    <h2>TXO URI Format</h2>
+    <p>
+      Immortalize uses the <strong>TXO URI</strong> scheme to reference on-chain anchors:
+    </p>
+
+    <pre><code>txo:&lt;chain&gt;:&lt;txid&gt;:&lt;vout&gt;
+
+<span class="comment">// Examples:</span>
+txo:btc:a1b2c3d4e5f6...1234567890abcdef:0    <span class="comment">// Bitcoin mainnet</span>
+txo:tbtc4:f0e1d2c3b4a5...9876543210fedcba:0  <span class="comment">// Bitcoin testnet4</span>
+txo:ltc:0a1b2c3d4e5f...abcdef1234567890:0    <span class="comment">// Litecoin</span></code></pre>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>chain</code></td>
+          <td>Network identifier: <code>btc</code>, <code>tbtc4</code>, or <code>ltc</code></td>
+        </tr>
+        <tr>
+          <td><code>txid</code></td>
+          <td>Transaction ID (64 hex characters)</td>
+        </tr>
+        <tr>
+          <td><code>vout</code></td>
+          <td>Output index in the transaction (usually 0)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Why Nostr-Native?</h2>
+    <p>
+      Blocktrails use <strong>full secp256k1 keys</strong>—the same keys Nostr uses.
+      This means:
+    </p>
+    <ul>
+      <li><strong>No key conversion</strong> — Your <code>nsec</code> works directly</li>
+      <li><strong>Identity continuity</strong> — Your Nostr pubkey controls your anchors</li>
+      <li><strong>Self-sovereign</strong> — You don't need our service to verify</li>
+    </ul>
+
+    <h2>Supported Chains</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Chain</th>
+          <th>Address Prefix</th>
+          <th>Cost</th>
+          <th>Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bitcoin</strong></td>
+          <td><code>bc1p...</code></td>
+          <td>~2000 sats</td>
+          <td>Maximum security, production</td>
+        </tr>
+        <tr>
+          <td><strong>Testnet4</strong></td>
+          <td><code>tb1p...</code></td>
+          <td>Free</td>
+          <td>Development, testing</td>
+        </tr>
+        <tr>
+          <td><strong>Litecoin</strong></td>
+          <td><code>ltc1p...</code></td>
+          <td>Free tier</td>
+          <td>Budget option</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>What Gets Anchored</h2>
+    <p>
+      The anchor state includes:
+    </p>
+    <pre><code>{
+  <span class="string">"v"</span>: <span class="number">1</span>,                        <span class="comment">// Version</span>
+  <span class="string">"n"</span>: <span class="string">"abc123..."</span>,             <span class="comment">// Note ID (hex)</span>
+  <span class="string">"h"</span>: <span class="string">"sha256:7f3a..."</span>,        <span class="comment">// Canonical note hash</span>
+  <span class="string">"p"</span>: <span class="string">"def456..."</span>,             <span class="comment">// Author pubkey (hex)</span>
+  <span class="string">"t"</span>: <span class="number">1705312320</span>,              <span class="comment">// Note created_at</span>
+  <span class="string">"a"</span>: <span class="number">1705312400</span>               <span class="comment">// Anchor timestamp</span>
+}</code></pre>
+
+    <p>
+      This state is hashed to derive the address. The state itself is stored off-chain
+      (on relays, IPFS, or our API), but the commitment is on-chain.
+    </p>
+
+    <h2>Security Model</h2>
+    <h3>What we guarantee:</h3>
+    <ul>
+      <li>The note hash was committed to Bitcoin at a specific block height</li>
+      <li>The commitment cannot be forged without the private key</li>
+      <li>Anyone can independently verify the anchor</li>
+    </ul>
+
+    <h3>What we don't guarantee:</h3>
+    <ul>
+      <li>The note content is accurate (we just anchor what exists)</li>
+      <li>The note will remain on relays (but the proof persists)</li>
+      <li>Future protocol changes (Bitcoin, Nostr)</li>
+    </ul>
+
+    <h2>Privacy Considerations</h2>
+    <ul>
+      <li>
+        <strong>Public anchors:</strong> By default, the P2TR address is derived from
+        your pubkey + note hash. Someone with both can find your anchor on-chain.
+      </li>
+      <li>
+        <strong>On-chain footprint:</strong> Each immortalization creates one UTXO.
+        This is visible on block explorers.
+      </li>
+      <li>
+        <strong>Optional privacy:</strong> You can use a separate key for anchoring
+        if you don't want linkability to your Nostr identity.
+      </li>
+    </ul>
+
+    <h2>FAQ</h2>
+
+    <h3>Why not just use OP_RETURN?</h3>
+    <p>
+      OP_RETURN embeds data directly in the blockchain, but it's not tied to your identity.
+      Anyone could embed the same hash. With Blocktrails, the anchor address is derived from
+      your key—it's cryptographically bound to you.
+    </p>
+
+    <h3>What if the note gets deleted from relays?</h3>
+    <p>
+      The on-chain proof still exists. If you have a copy of the note content, you can
+      always prove it matches the anchor. The note can be stored anywhere—we recommend
+      keeping a backup.
+    </p>
+
+    <h3>Can I anchor someone else's note?</h3>
+    <p>
+      Yes, but the anchor will be tied to your key, not theirs. The proof shows that
+      you anchored their note at a specific time, which might still be useful (archival,
+      evidence collection, etc.).
+    </p>
+
+    <h3>What happens if Bitcoin forks?</h3>
+    <p>
+      Your proof follows the longest chain. In practice, with 6+ confirmations,
+      reorganizations are extremely unlikely.
+    </p>
+
+    <h3>Do I need to run a node?</h3>
+    <p>
+      No. Blocktrails are SPV-compatible. You can verify with merkle proofs from
+      any block explorer or Electrum server.
+    </p>
+
+    <h2>Technical Reference</h2>
+
+    <h3>Canonical Note Hash (NIP-01)</h3>
+    <pre><code><span class="keyword">function</span> <span class="function">computeNoteHash</span>(note) {
+  <span class="keyword">const</span> canonical = JSON.stringify([
+    <span class="number">0</span>,              <span class="comment">// Reserved</span>
+    note.pubkey,    <span class="comment">// Author pubkey (hex)</span>
+    note.created_at,<span class="comment">// Unix timestamp</span>
+    note.kind,      <span class="comment">// Event kind</span>
+    note.tags,      <span class="comment">// Tags array</span>
+    note.content    <span class="comment">// Content string</span>
+  ]);
+  <span class="keyword">return</span> sha256(canonical);
+}</code></pre>
+
+    <h3>Key Derivation</h3>
+    <pre><code><span class="keyword">function</span> <span class="function">deriveAnchorKey</span>(privateKey, noteHash) {
+  <span class="comment">// Convert hash to scalar (mod curve order)</span>
+  <span class="keyword">const</span> tweak = BigInt(<span class="string">'0x'</span> + noteHash) % secp256k1.CURVE.n;
+
+  <span class="comment">// Add tweak to private key</span>
+  <span class="keyword">const</span> newPrivKey = (privateKey + tweak) % secp256k1.CURVE.n;
+
+  <span class="comment">// Get corresponding public key</span>
+  <span class="keyword">const</span> newPubKey = secp256k1.getPublicKey(newPrivKey);
+
+  <span class="keyword">return</span> { privateKey: newPrivKey, publicKey: newPubKey };
+}</code></pre>
+
+    <h3>P2TR Address Generation</h3>
+    <pre><code><span class="keyword">function</span> <span class="function">pubkeyToP2TR</span>(pubkey, network) {
+  <span class="comment">// Use x-only pubkey (32 bytes) for Taproot</span>
+  <span class="keyword">const</span> xOnly = pubkey.slice(<span class="number">1</span>); <span class="comment">// Remove prefix byte</span>
+
+  <span class="comment">// Encode as bech32m</span>
+  <span class="keyword">const</span> prefix = network === <span class="string">'testnet4'</span> ? <span class="string">'tb'</span> : <span class="string">'bc'</span>;
+  <span class="keyword">return</span> bech32m.encode(prefix, [<span class="number">1</span>, ...convertBits(xOnly)]);
+}</code></pre>
+
+    <footer>
+      <p>
+        <a href="index.html">Immortalize</a> ·
+        <a href="#">GitHub</a> ·
+        Built on <a href="https://blocktrails.org" target="_blank">Blocktrails</a>
+      </p>
+      <p style="margin-top: 0.5rem;">
+        Questions? Find us on Nostr.
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

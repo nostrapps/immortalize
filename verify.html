@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify - Immortalize</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-secondary: #666;
+      --text-dim: #999;
+      --primary: #6366f1;
+      --primary-light: #eef2ff;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --error: #ef4444;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+
+    nav a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; margin-left: 1rem; }
+    nav a:hover { color: var(--primary); }
+
+    .hero { text-align: center; padding: 1.5rem 0; }
+    .hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .hero p { color: var(--text-secondary); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      margin-bottom: 1rem;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    textarea { min-height: 80px; resize: vertical; font-family: monospace; font-size: 0.8rem; }
+
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      margin-top: 0.5rem;
+    }
+
+    .result {
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+    .result.valid { background: var(--success-light); border: 1px solid var(--success); }
+    .result.invalid { background: #fef2f2; border: 1px solid var(--error); }
+    .result.pending { background: var(--warning-light); border: 1px solid var(--warning); }
+
+    .result-icon {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .result-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .result.valid .result-title { color: var(--success); }
+    .result.invalid .result-title { color: var(--error); }
+
+    .details {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+    .details div { margin-bottom: 0.5rem; word-break: break-all; }
+    .details span { color: var(--text-dim); }
+
+    .preview {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .preview-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 600;
+    }
+    .preview-name { font-weight: 600; }
+    .preview-handle { font-size: 0.75rem; color: var(--text-dim); font-family: monospace; }
+    .preview-content { font-size: 0.9rem; white-space: pre-wrap; }
+
+    .error { background: #fef2f2; border: 1px solid #fecaca; color: var(--error); padding: 0.75rem; border-radius: 8px; margin-top: 1rem; font-size: 0.875rem; }
+
+    .loading { text-align: center; padding: 2rem; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 1rem;
+    }
+    .tab {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .tab.active { background: var(--primary); color: white; }
+
+    footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: var(--text-dim); }
+    footer a { color: var(--text-dim); text-decoration: none; margin: 0 0.5rem; }
+    footer a:hover { color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { html, render, useState, useEffect } from 'https://esm.sh/htm/preact/standalone';
+    import * as secp256k1 from 'https://esm.sh/@noble/secp256k1@2.1.0';
+    import { sha256 } from 'https://esm.sh/@noble/hashes@1.4.0/sha256';
+    import { bytesToHex, hexToBytes } from 'https://esm.sh/@noble/hashes@1.4.0/utils';
+    import { bech32m } from 'https://esm.sh/@scure/base@1.1.6';
+
+    const CURVE_ORDER = secp256k1.CURVE.n;
+
+    // Derive expected anchor pubkey from base pubkey + data hash
+    function deriveExpectedPubkey(basePubkeyHex, dataHash) {
+      // Ensure we have x-only (32 bytes)
+      const xOnly = basePubkeyHex.length === 66 ? basePubkeyHex.slice(2) : basePubkeyHex;
+
+      // Convert to point (add 02 prefix for even y)
+      const fullPubkey = '02' + xOnly;
+      const point = secp256k1.ProjectivePoint.fromHex(fullPubkey);
+
+      // Calculate tweak
+      const tweak = BigInt('0x' + dataHash) % CURVE_ORDER;
+
+      // Tweak the point: P' = P + tweak*G
+      const tweakPoint = secp256k1.ProjectivePoint.BASE.multiply(tweak);
+      const newPoint = point.add(tweakPoint);
+
+      // Get x-only pubkey from result
+      const newPubkeyHex = newPoint.toHex(true); // compressed
+      return newPubkeyHex.slice(2); // x-only (remove prefix)
+    }
+
+    // Parse TXO URI
+    function parseTxo(uri) {
+      const match = uri.match(/^txo:(\w+):([a-f0-9]{64}):(\d+)$/i);
+      if (!match) throw new Error('Invalid TXO URI format');
+      return { chain: match[1], txid: match[2], vout: parseInt(match[3]) };
+    }
+
+    // Fetch TX from mempool API
+    async function fetchTx(chain, txid) {
+      const apiBase = {
+        'tbtc4': 'https://mempool.space/testnet4/api',
+        'btc': 'https://mempool.space/api',
+        'ltc': 'https://litecoinspace.org/api'
+      }[chain];
+
+      if (!apiBase) throw new Error('Unsupported chain: ' + chain);
+
+      const res = await fetch(`${apiBase}/tx/${txid}`);
+      if (!res.ok) throw new Error('Transaction not found');
+      return res.json();
+    }
+
+    // Extract x-only pubkey from P2TR output scriptPubKey
+    function extractP2TRPubkey(scriptPubKey) {
+      // P2TR scriptPubKey: OP_1 (0x51) + PUSH32 (0x20) + 32-byte-x-only-pubkey
+      if (!scriptPubKey || scriptPubKey.length !== 68) return null;
+      if (!scriptPubKey.startsWith('5120')) return null;
+      return scriptPubKey.slice(4); // Remove 5120 prefix
+    }
+
+    // Nostr helpers
+    const DEFAULT_RELAYS = [
+      'wss://nos.lol',
+      'wss://relay.primal.net',
+      'wss://purplepag.es',
+      'wss://relay.nostr.band'
+    ];
+    const BECH32_ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+
+    function bech32Decode(str) {
+      str = str.toLowerCase();
+      const sep = str.lastIndexOf('1');
+      const data = str.slice(sep + 1, -6);
+      const values = [];
+      for (const c of data) values.push(BECH32_ALPHABET.indexOf(c));
+      let acc = 0, bits = 0;
+      const bytes = [];
+      for (const v of values) {
+        acc = (acc << 5) | v;
+        bits += 5;
+        while (bits >= 8) { bits -= 8; bytes.push((acc >> bits) & 0xff); }
+      }
+      return new Uint8Array(bytes);
+    }
+
+    function decodeNpub(npub) {
+      if (/^[a-f0-9]{64}$/i.test(npub)) return npub.toLowerCase();
+      if (npub.startsWith('npub1')) return bytesToHex(bech32Decode(npub));
+      throw new Error('Invalid pubkey format');
+    }
+
+    async function fetchFromRelays(filter, relays = DEFAULT_RELAYS) {
+      return new Promise((resolve, reject) => {
+        let resolved = false;
+        const sockets = [];
+        const cleanup = () => sockets.forEach(ws => { try { ws.close(); } catch (e) {} });
+        const timeout = setTimeout(() => {
+          if (!resolved) { resolved = true; cleanup(); reject(new Error('Timeout')); }
+        }, 8000);
+        for (const relay of relays) {
+          try {
+            const ws = new WebSocket(relay);
+            sockets.push(ws);
+            ws.onopen = () => ws.send(JSON.stringify(['REQ', Math.random().toString(36).slice(2), filter]));
+            ws.onmessage = (e) => {
+              try {
+                const msg = JSON.parse(e.data);
+                if (msg[0] === 'EVENT' && msg[2] && !resolved) {
+                  resolved = true; clearTimeout(timeout); cleanup(); resolve(msg[2]);
+                }
+              } catch (err) {}
+            };
+          } catch (e) {}
+        }
+      });
+    }
+
+    function computeEventHash(event) {
+      const canonical = JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]);
+      return bytesToHex(sha256(new TextEncoder().encode(canonical)));
+    }
+
+    function truncate(str, len = 16) {
+      if (!str || str.length <= len) return str;
+      return str.slice(0, len / 2) + '...' + str.slice(-len / 2);
+    }
+
+    function getInitials(str) {
+      if (!str) return '?';
+      return str.slice(0, 2).toUpperCase();
+    }
+
+    function getExplorerUrl(chain, txid) {
+      const base = {
+        'tbtc4': 'https://mempool.space/testnet4',
+        'btc': 'https://mempool.space',
+        'ltc': 'https://litecoinspace.org'
+      }[chain] || 'https://mempool.space/testnet4';
+      return `${base}/tx/${txid}`;
+    }
+
+    // App
+    function App() {
+      const [mode, setMode] = useState('txo'); // 'txo' or 'bundle'
+      const [txoInput, setTxoInput] = useState('');
+      const [pubkeyInput, setPubkeyInput] = useState('');
+      const [bundleInput, setBundleInput] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState(null);
+      const [result, setResult] = useState(null);
+      const [verifyType, setVerifyType] = useState('profile'); // 'profile' or 'note'
+      const [noteIdInput, setNoteIdInput] = useState('');
+
+      const [autoVerifyReady, setAutoVerifyReady] = useState(false);
+      const [urlType, setUrlType] = useState(null); // Track URL type for auto-verify
+
+      // Check URL for txo param
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const txo = params.get('txo');
+        const pubkey = params.get('pubkey');
+        const type = params.get('type');
+        const noteId = params.get('noteId');
+        if (txo) setTxoInput(txo);
+        if (pubkey) setPubkeyInput(pubkey);
+        if (type) {
+          setVerifyType(type);
+          setUrlType(type);
+        }
+        if (noteId) setNoteIdInput(noteId);
+        // Mark for auto-verify if params present
+        if (txo && pubkey) setAutoVerifyReady(true);
+      }, []);
+
+      // Auto-verify after all state is set
+      useEffect(() => {
+        if (autoVerifyReady && txoInput && pubkeyInput && !loading && !result) {
+          // For notes, wait until noteIdInput is set (if URL had noteId)
+          const params = new URLSearchParams(window.location.search);
+          const urlNoteId = params.get('noteId');
+          if (urlType === 'note' && urlNoteId && !noteIdInput) return; // Wait for noteId to be set
+
+          setAutoVerifyReady(false);
+          handleVerify();
+        }
+      }, [autoVerifyReady, txoInput, pubkeyInput, verifyType, noteIdInput]);
+
+      const handleVerify = async () => {
+        setError(null);
+        setResult(null);
+        setLoading(true);
+
+        try {
+          let txo, basePubkey, dataHash, event;
+
+          if (mode === 'bundle') {
+            // Parse proof bundle JSON
+            const bundle = JSON.parse(bundleInput);
+            txo = parseTxo(bundle.txo);
+            basePubkey = bundle.pubkey;
+            dataHash = bundle.dataHash;
+          } else {
+            // Manual TXO + pubkey input
+            if (!txoInput.trim()) throw new Error('Enter a TXO URI');
+            if (!pubkeyInput.trim()) throw new Error('Enter the Nostr pubkey');
+
+            txo = parseTxo(txoInput.trim());
+            basePubkey = decodeNpub(pubkeyInput.trim());
+          }
+
+          // Fetch the transaction
+          const tx = await fetchTx(txo.chain, txo.txid);
+
+          if (!tx.vout || !tx.vout[txo.vout]) {
+            throw new Error('Output not found in transaction');
+          }
+
+          const output = tx.vout[txo.vout];
+          const anchorPubkey = extractP2TRPubkey(output.scriptpubkey);
+
+          if (!anchorPubkey) {
+            throw new Error('Output is not a P2TR address');
+          }
+
+          // Fetch the Nostr event to get the data hash
+          try {
+            if (verifyType === 'note') {
+              if (!noteIdInput) {
+                throw new Error('Note ID required for note verification. Old proofs may not have this data stored.');
+              }
+              // Fetch note by ID
+              event = await fetchFromRelays({ ids: [noteIdInput], limit: 1 });
+              if (!event) throw new Error('Note not found on relays');
+              dataHash = computeEventHash(event);
+            } else {
+              // Fetch profile by author
+              event = await fetchFromRelays({ kinds: [0], authors: [basePubkey], limit: 1 });
+              dataHash = computeEventHash(event);
+            }
+          } catch (e) {
+            // If we have dataHash from bundle, use that
+            if (!dataHash) {
+              throw new Error(e.message || (verifyType === 'note' ? 'Could not fetch Nostr note' : 'Could not fetch Nostr profile to compute hash'));
+            }
+          }
+
+          // Derive expected pubkey
+          const expectedPubkey = deriveExpectedPubkey(basePubkey, dataHash);
+
+          // Compare
+          const isValid = expectedPubkey.toLowerCase() === anchorPubkey.toLowerCase();
+
+          setResult({
+            valid: isValid,
+            txo,
+            tx,
+            anchorPubkey,
+            expectedPubkey,
+            basePubkey,
+            dataHash,
+            event,
+            verifyType,
+            confirmations: tx.status?.block_height ? 'Confirmed' : 'Unconfirmed'
+          });
+
+        } catch (e) {
+          setError(e.message || 'Verification failed');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const reset = () => {
+        setTxoInput('');
+        setPubkeyInput('');
+        setBundleInput('');
+        setResult(null);
+        setError(null);
+      };
+
+      const profileData = result?.event?.kind === 0 ? JSON.parse(result.event.content || '{}') : null;
+      const noteData = result?.event?.kind === 1 ? result.event : null;
+
+      return html`
+        <div class="container">
+          <header>
+            <a href="index.html" class="logo"><div class="logo-icon">~</div> Immortalize</a>
+            <nav>
+              <a href="index.html">Create</a>
+              <a href="docs.html">Docs</a>
+            </nav>
+          </header>
+
+          <div class="hero">
+            <h1>Verify Proof</h1>
+            <p>Check if a Nostr identity is anchored on Bitcoin</p>
+          </div>
+
+          <div class="card">
+            ${!result && html`
+              <div class="tabs">
+                <button class="tab ${mode === 'txo' ? 'active' : ''}" onClick=${() => setMode('txo')}>TXO URI</button>
+                <button class="tab ${mode === 'bundle' ? 'active' : ''}" onClick=${() => setMode('bundle')}>Proof Bundle</button>
+              </div>
+
+              ${mode === 'txo' && html`
+                <label>Proof TXO URI</label>
+                <input
+                  type="text"
+                  placeholder="txo:tbtc4:abc123...:0"
+                  value=${txoInput}
+                  onInput=${e => setTxoInput(e.target.value)}
+                />
+
+                <label>Nostr Public Key</label>
+                <input
+                  type="text"
+                  placeholder="npub1... or hex"
+                  value=${pubkeyInput}
+                  onInput=${e => setPubkeyInput(e.target.value)}
+                />
+              `}
+
+              ${mode === 'bundle' && html`
+                <label>Proof Bundle (JSON)</label>
+                <textarea
+                  placeholder='{"txo": "txo:...", "pubkey": "...", "dataHash": "..."}'
+                  value=${bundleInput}
+                  onInput=${e => setBundleInput(e.target.value)}
+                />
+              `}
+
+              ${error && html`<div class="error">${error}</div>`}
+
+              ${loading && html`
+                <div class="loading">
+                  <div class="spinner"></div>
+                  <p>Verifying on-chain...</p>
+                </div>
+              `}
+
+              ${!loading && html`
+                <button class="btn btn-primary" onClick=${handleVerify}>
+                  Verify Proof
+                </button>
+              `}
+            `}
+
+            ${result && html`
+              <div class="result ${result.valid ? 'valid' : 'invalid'}">
+                <div class="result-icon">${result.valid ? '✓' : '✗'}</div>
+                <div class="result-title">
+                  ${result.valid ? 'Valid Proof' : 'Invalid Proof'}
+                </div>
+                <p style="text-align: center; font-size: 0.9rem; color: var(--text-secondary);">
+                  ${result.valid
+                    ? 'This identity is cryptographically anchored to Bitcoin.'
+                    : 'The anchor does not match the claimed identity.'}
+                </p>
+              </div>
+
+              ${profileData && html`
+                <div class="preview">
+                  <div class="preview-header">
+                    <div class="avatar">${getInitials(profileData.name || result.basePubkey)}</div>
+                    <div>
+                      <div class="preview-name">${profileData.name || 'Anonymous'}</div>
+                      <div class="preview-handle">${truncate(result.basePubkey, 16)}</div>
+                    </div>
+                  </div>
+                  ${profileData.about && html`<div class="preview-content">${profileData.about}</div>`}
+                </div>
+              `}
+
+              ${noteData && html`
+                <div class="preview">
+                  <div class="preview-header">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📝</div>
+                    <div>
+                      <div class="preview-name">Note</div>
+                      <div class="preview-handle">by ${truncate(noteData.pubkey, 16)}</div>
+                    </div>
+                  </div>
+                  <div class="preview-content" style="white-space: pre-wrap; word-break: break-word;">${noteData.content}</div>
+                </div>
+              `}
+
+              <div class="details">
+                <div><span>Type:</span> ${result.verifyType === 'note' ? 'Note' : 'Profile'}</div>
+                <div><span>Chain:</span> ${result.txo.chain}</div>
+                <div><span>TX:</span> <a href=${getExplorerUrl(result.txo.chain, result.txo.txid)} target="_blank" style="color: var(--primary);">${truncate(result.txo.txid, 18)}</a></div>
+                <div><span>Status:</span> ${result.confirmations}</div>
+                <div><span>Data Hash:</span> ${truncate(result.dataHash, 20)}</div>
+                <div><span>Base Pubkey:</span> ${truncate(result.basePubkey, 20)}</div>
+                <div><span>Anchor Pubkey:</span> ${truncate(result.anchorPubkey, 20)}</div>
+                <div><span>Expected:</span> ${truncate(result.expectedPubkey, 20)}</div>
+                ${!result.valid && html`
+                  <div style="color: var(--error); margin-top: 0.5rem;">
+                    Mismatch: anchor ≠ expected
+                  </div>
+                `}
+              </div>
+
+              <button class="btn btn-primary" style="margin-top: 1rem;" onClick=${() => window.open(getExplorerUrl(result.txo.chain, result.txo.txid), '_blank')}>
+                View on Mempool
+              </button>
+
+              <button class="btn btn-secondary" onClick=${reset}>
+                Verify Another
+              </button>
+
+              ${result.valid && html`
+                <button class="btn btn-secondary" onClick=${() => {
+                  const url = new URL(window.location);
+                  url.searchParams.set('txo', 'txo:' + result.txo.chain + ':' + result.txo.txid + ':' + result.txo.vout);
+                  url.searchParams.set('pubkey', result.basePubkey);
+                  navigator.clipboard.writeText(url.toString());
+                }}>
+                  Copy Shareable Link
+                </button>
+              `}
+            `}
+          </div>
+
+          <footer>
+            <a href="index.html">Create Proof</a> · <a href="docs.html">How it works</a>
+            <div style="margin-top:0.5rem">Built on <a href="https://blocktrails.org" target="_blank">Blocktrails</a></div>
+          </footer>
+        </div>
+      `;
+    }
+
+    render(html`<${App} />`, document.getElementById('app'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Immortalize - Anchor Nostr to Bitcoin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --border: #e5e5e5;
+      --text: #1a1a1a;
+      --text-secondary: #666;
+      --text-dim: #999;
+      --primary: #6366f1;
+      --primary-light: #eef2ff;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --error: #ef4444;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+    }
+
+    nav { display: flex; align-items: center; gap: 1rem; }
+    nav a { color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; }
+    nav a:hover { color: var(--primary); }
+
+    .connect-btn {
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .connect-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .connect-btn.connected { background: var(--success-light); border-color: var(--success); color: var(--success); }
+
+    .hero { text-align: center; padding: 2rem 0; }
+    .hero h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p { color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: var(--warning-light);
+      color: #92400e;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 1rem;
+    }
+    .tab {
+      flex: 1;
+      padding: 0.625rem;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--primary); color: white; }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      margin-bottom: 1rem;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      margin-top: 0.5rem;
+    }
+    .btn-secondary:hover { border-color: var(--text-dim); }
+
+    .quick-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary-light);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+    }
+    .quick-btn:hover { background: var(--primary); color: white; }
+
+    .divider {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Preview */
+    .preview {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .preview-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 600; font-size: 1.1rem;
+    }
+    .preview-name { font-weight: 600; }
+    .preview-handle { font-size: 0.8rem; color: var(--text-dim); font-family: monospace; }
+    .preview-content { font-size: 0.95rem; white-space: pre-wrap; word-break: break-word; }
+    .preview-meta {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* What happens */
+    .explainer {
+      background: var(--primary-light);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+    .explainer strong { display: block; margin-bottom: 0.25rem; }
+
+    /* Chain selector */
+    .chains { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .chain {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chain:hover { border-color: var(--text-dim); }
+    .chain.selected { border-color: var(--primary); background: var(--primary-light); }
+    .chain-name { font-size: 0.85rem; font-weight: 600; }
+    .chain-price { font-size: 0.7rem; color: var(--text-dim); }
+
+    /* Success */
+    .success-icon {
+      width: 80px; height: 80px;
+      background: var(--success-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 2.5rem;
+      animation: pop 0.4s ease-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .success-title { font-size: 1.5rem; font-weight: 700; color: var(--success); text-align: center; }
+    .success-sub { color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem; }
+
+    .proof-box {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+    .proof-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+      font-family: sans-serif;
+    }
+
+    /* Loading */
+    .loading { text-align: center; padding: 2rem; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+    .modal {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+    }
+    .modal h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+    .modal-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .modal-tab {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .modal-tab.active { background: var(--primary); color: white; }
+
+    .error { background: #fef2f2; border: 1px solid #fecaca; color: var(--error); padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.875rem; }
+    .warning { background: var(--warning-light); border: 1px solid #fcd34d; color: #92400e; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.8rem; }
+
+    footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: var(--text-dim); }
+    footer a { color: var(--text-dim); text-decoration: none; margin: 0 0.5rem; }
+    footer a:hover { color: var(--primary); }
+
+    .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 1000; }
+
+    .detail-toggle {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .detail-toggle:hover { color: var(--primary); }
+
+    .details {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+    .details div { margin-bottom: 0.5rem; }
+    .details span { color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { html, render, useState, useEffect } from 'https://esm.sh/htm/preact/standalone';
+    import { secp256k1, schnorr } from 'https://esm.sh/@noble/curves@1.4.0/secp256k1';
+    import { sha256 } from 'https://esm.sh/@noble/hashes@1.4.0/sha256';
+    import { bytesToHex, hexToBytes } from 'https://esm.sh/@noble/hashes@1.4.0/utils';
+    import { bech32, bech32m } from 'https://esm.sh/@scure/base@1.1.6';
+
+    // =============================================
+    // BLOCKTRAILS CORE
+    // =============================================
+    const CURVE_ORDER = secp256k1.CURVE.n;
+
+    function deriveAnchorKey(privateKeyHex, dataHash) {
+      const privKey = BigInt('0x' + privateKeyHex);
+      const tweak = BigInt('0x' + dataHash) % CURVE_ORDER;
+      const newPrivKey = (privKey + tweak) % CURVE_ORDER;
+      const finalPrivKey = newPrivKey < 0n ? newPrivKey + CURVE_ORDER : newPrivKey;
+      const newPrivKeyHex = finalPrivKey.toString(16).padStart(64, '0');
+      const pubKey = secp256k1.getPublicKey(newPrivKeyHex, true);
+      return {
+        privateKey: newPrivKeyHex,
+        publicKey: bytesToHex(pubKey),
+        xOnlyPubKey: bytesToHex(pubKey.slice(1))
+      };
+    }
+
+    function xOnlyToP2TR(xOnlyHex, network = 'tbtc4') {
+      const xOnlyBytes = hexToBytes(xOnlyHex);
+      const words = convertBits(Array.from(xOnlyBytes), 8, 5, true);
+      words.unshift(1);
+      const prefix = network === 'btc' ? 'bc' : network === 'ltc' ? 'ltc' : 'tb';
+      return bech32m.encode(prefix, words);
+    }
+
+    function convertBits(data, fromBits, toBits, pad) {
+      let acc = 0, bits = 0;
+      const result = [], maxv = (1 << toBits) - 1;
+      for (const value of data) {
+        acc = (acc << fromBits) | value;
+        bits += fromBits;
+        while (bits >= toBits) { bits -= toBits; result.push((acc >> bits) & maxv); }
+      }
+      if (pad && bits > 0) result.push((acc << (toBits - bits)) & maxv);
+      return result;
+    }
+
+    // =============================================
+    // TRANSACTION BUILDER - Real P2TR Implementation
+    // =============================================
+
+    // Parse voucher: txo:chain:txid:vout?amount=X&key=Y
+    function parseVoucher(uri) {
+      const [base, query] = uri.split('?');
+      const [, chain, txid, vout] = base.split(':');
+      const params = new URLSearchParams(query || '');
+      return {
+        chain,
+        txid,
+        vout: parseInt(vout),
+        amount: parseInt(params.get('amount') || '0'),
+        key: params.get('key') || null
+      };
+    }
+
+    // Set to true for mock transactions (testing UI), false for real broadcasts
+    const USE_MOCK_TX = false;
+
+    // =============================================
+    // FAUCET / FUNDING SYSTEM
+    // =============================================
+
+    // Generate or retrieve faucet key
+    function getFaucetKey() {
+      // Check URL param first (for shared/pre-funded faucets)
+      const params = new URLSearchParams(window.location.search);
+      const urlKey = params.get('key');
+      if (urlKey && /^[a-f0-9]{64}$/i.test(urlKey)) {
+        return urlKey.toLowerCase();
+      }
+
+      // Check localStorage
+      let key = localStorage.getItem('immortalize_faucet_key');
+      if (key && /^[a-f0-9]{64}$/i.test(key)) {
+        return key;
+      }
+
+      // Generate new random key
+      const randomBytes = new Uint8Array(32);
+      crypto.getRandomValues(randomBytes);
+      key = bytesToHex(randomBytes);
+      localStorage.setItem('immortalize_faucet_key', key);
+      return key;
+    }
+
+    function getFaucetAddress(key, chain) {
+      const pubKey = secp256k1.getPublicKey(key, true);
+      const xOnly = bytesToHex(pubKey.slice(1));
+      return xOnlyToP2TR(xOnly, chain);
+    }
+
+    // Check for UTXOs at address via mempool API
+    async function checkFaucetUTXOs(address, chain) {
+      const apiBase = {
+        'tbtc4': 'https://mempool.space/testnet4/api',
+        'btc': 'https://mempool.space/api',
+        'ltc': 'https://litecoinspace.org/api'
+      }[chain] || 'https://mempool.space/testnet4/api';
+
+      try {
+        const res = await fetch(`${apiBase}/address/${address}/utxo`);
+        if (!res.ok) return [];
+        const utxos = await res.json();
+        return utxos.map(u => ({
+          txid: u.txid,
+          vout: u.vout,
+          amount: u.value,
+          confirmed: u.status?.confirmed || false
+        }));
+      } catch (e) {
+        console.error('Failed to check UTXOs:', e);
+        return [];
+      }
+    }
+
+    // Convert UTXOs to voucher format
+    function utxoToVoucher(utxo, chain, key) {
+      return {
+        chain,
+        txid: utxo.txid,
+        vout: utxo.vout,
+        amount: utxo.amount,
+        key
+      };
+    }
+
+    // --- Binary Helpers ---
+    function writeUint8(n) { return new Uint8Array([n]); }
+    function writeUint16LE(n) { const b = new Uint8Array(2); new DataView(b.buffer).setUint16(0, n, true); return b; }
+    function writeUint32LE(n) { const b = new Uint8Array(4); new DataView(b.buffer).setUint32(0, n, true); return b; }
+    function writeUint64LE(n) { const b = new Uint8Array(8); new DataView(b.buffer).setBigUint64(0, BigInt(n), true); return b; }
+    function writeVarInt(n) {
+      if (n < 0xfd) return new Uint8Array([n]);
+      if (n <= 0xffff) return new Uint8Array([0xfd, n & 0xff, (n >> 8) & 0xff]);
+      if (n <= 0xffffffff) return new Uint8Array([0xfe, n & 0xff, (n >> 8) & 0xff, (n >> 16) & 0xff, (n >> 24) & 0xff]);
+      throw new Error('VarInt too large');
+    }
+    function concatBytes(...arrays) {
+      const len = arrays.reduce((a, b) => a + b.length, 0);
+      const result = new Uint8Array(len);
+      let offset = 0;
+      for (const arr of arrays) { result.set(arr, offset); offset += arr.length; }
+      return result;
+    }
+    function reverseBytes(bytes) {
+      const r = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) r[i] = bytes[bytes.length - 1 - i];
+      return r;
+    }
+
+    // --- P2TR Script ---
+    function createP2TRScript(xOnlyPubKeyHex) {
+      // OP_1 <32-byte-x-only-pubkey>
+      const pubkey = hexToBytes(xOnlyPubKeyHex);
+      return concatBytes(new Uint8Array([0x51, 0x20]), pubkey); // OP_1 + PUSH32
+    }
+
+    // --- BIP341 Taproot Sighash ---
+    function computeTaprootSighash(tx, inputIndex, prevouts, hashType = 0x00) {
+      // BIP341 signature hash for key-path spending
+      // hashType 0x00 = SIGHASH_DEFAULT (same as ALL for taproot)
+
+      // Epoch
+      const epoch = new Uint8Array([0x00]);
+
+      // Hash type
+      const ht = new Uint8Array([hashType]);
+
+      // nVersion
+      const nVersion = writeUint32LE(tx.version);
+
+      // nLockTime
+      const nLockTime = writeUint32LE(tx.locktime);
+
+      // sha_prevouts - hash of all input outpoints
+      let prevoutsData = new Uint8Array(0);
+      for (const inp of tx.inputs) {
+        prevoutsData = concatBytes(prevoutsData, reverseBytes(hexToBytes(inp.txid)), writeUint32LE(inp.vout));
+      }
+      const shaPrevouts = sha256(prevoutsData);
+
+      // sha_amounts - hash of all input amounts
+      let amountsData = new Uint8Array(0);
+      for (const prev of prevouts) {
+        amountsData = concatBytes(amountsData, writeUint64LE(prev.value));
+      }
+      const shaAmounts = sha256(amountsData);
+
+      // sha_scriptpubkeys - hash of all input scriptPubKeys
+      let spksData = new Uint8Array(0);
+      for (const prev of prevouts) {
+        const spk = prev.scriptPubKey;
+        spksData = concatBytes(spksData, writeVarInt(spk.length), spk);
+      }
+      const shaScriptPubkeys = sha256(spksData);
+
+      // sha_sequences - hash of all input sequences
+      let seqData = new Uint8Array(0);
+      for (const inp of tx.inputs) {
+        seqData = concatBytes(seqData, writeUint32LE(inp.sequence));
+      }
+      const shaSequences = sha256(seqData);
+
+      // sha_outputs - hash of all outputs
+      let outsData = new Uint8Array(0);
+      for (const out of tx.outputs) {
+        outsData = concatBytes(outsData, writeUint64LE(out.value), writeVarInt(out.scriptPubKey.length), out.scriptPubKey);
+      }
+      const shaOutputs = sha256(outsData);
+
+      // spend_type
+      const spendType = new Uint8Array([0x00]); // key path, no annex
+
+      // input_index
+      const inputIdx = writeUint32LE(inputIndex);
+
+      // Construct the sighash preimage
+      const preimage = concatBytes(
+        epoch,
+        ht,
+        nVersion,
+        nLockTime,
+        shaPrevouts,
+        shaAmounts,
+        shaScriptPubkeys,
+        shaSequences,
+        shaOutputs,
+        spendType,
+        inputIdx
+      );
+
+      // Tagged hash: SHA256(SHA256("TapSighash") || SHA256("TapSighash") || preimage)
+      const tagHash = sha256(new TextEncoder().encode('TapSighash'));
+      return sha256(concatBytes(tagHash, tagHash, preimage));
+    }
+
+    // --- Build 2-TX Immortalization Flow ---
+    // TX1: Voucher → (refreshed voucher) + (genesis UTXO at user pubkey)
+    // TX2: Genesis UTXO → tweaked anchor output
+
+    async function buildImmortalizeTxs(voucher, userPubKeyHex, userPrivKeyHex, dataHash, chain) {
+      // Use 10k sats for testnet so UTXOs are useful, dust for mainnet
+      const DUST = (chain === 'tbtc4') ? 10000 : 546;
+      const FEE = 200;
+
+      // Get keys
+      const voucherPubKey = secp256k1.getPublicKey(voucher.key, true);
+      const voucherXOnly = bytesToHex(voucherPubKey.slice(1));
+
+      // User's base pubkey (x-only)
+      const userXOnly = userPubKeyHex.length === 66 ? userPubKeyHex.slice(2) : userPubKeyHex;
+
+      // Derive tweaked key for anchor
+      const anchor = deriveAnchorKey(userPrivKeyHex, dataHash);
+
+      // ========== TX1: Voucher spend ==========
+      // Output 0: Genesis UTXO (to user's base pubkey)
+      // Output 1: Refreshed voucher (back to voucher key)
+
+      const genesisAmount = DUST;
+      const tx1ChangeAmount = voucher.amount - genesisAmount - FEE;
+
+      if (tx1ChangeAmount < DUST) throw new Error('Insufficient voucher funds for TX1');
+
+      const tx1 = {
+        version: 2,
+        inputs: [{
+          txid: voucher.txid,
+          vout: voucher.vout,
+          sequence: 0xfffffffd,
+          witness: []
+        }],
+        outputs: [
+          { value: genesisAmount, scriptPubKey: createP2TRScript(userXOnly) },
+          { value: tx1ChangeAmount, scriptPubKey: createP2TRScript(voucherXOnly) }
+        ],
+        locktime: 0
+      };
+
+      // Sign TX1 with voucher key
+      const tx1Prevouts = [{ value: voucher.amount, scriptPubKey: createP2TRScript(voucherXOnly) }];
+
+      // Recalculate TX1 to give genesis enough for TX2 fee
+      const tx2Fee = 150; // Smaller fee for 1-in-1-out
+      const genesisNeeded = DUST + tx2Fee;
+
+      // Rebuild TX1 with correct genesis amount
+      tx1.outputs[0].value = genesisNeeded;
+      tx1.outputs[1].value = voucher.amount - genesisNeeded - FEE;
+
+      if (tx1.outputs[1].value < DUST) throw new Error('Insufficient voucher funds');
+
+      // Re-sign TX1
+      const tx1Sighash2 = computeTaprootSighash(tx1, 0, tx1Prevouts, 0x00);
+      tx1.inputs[0].witness = [await schnorr.sign(tx1Sighash2, voucher.key)];
+
+      const tx1Serialized = serializeTransaction(tx1);
+
+      // Now build TX2
+      const tx2 = {
+        version: 2,
+        inputs: [{
+          txid: tx1Serialized.txid,
+          vout: 0, // Genesis is output 0 of TX1
+          sequence: 0xfffffffd,
+          witness: []
+        }],
+        outputs: [
+          { value: DUST, scriptPubKey: createP2TRScript(anchor.xOnlyPubKey) }
+        ],
+        locktime: 0
+      };
+
+      // Sign TX2 with user's key (spending from their pubkey)
+      const tx2Prevouts = [{ value: genesisNeeded, scriptPubKey: createP2TRScript(userXOnly) }];
+      const tx2Sighash = computeTaprootSighash(tx2, 0, tx2Prevouts, 0x00);
+      tx2.inputs[0].witness = [await schnorr.sign(tx2Sighash, userPrivKeyHex)];
+
+      const tx2Serialized = serializeTransaction(tx2);
+
+      // New voucher info (TX1 output 1)
+      const newVoucher = {
+        chain: voucher.chain,
+        txid: tx1Serialized.txid,
+        vout: 1,
+        amount: tx1.outputs[1].value,
+        key: voucher.key
+      };
+
+      return {
+        tx1: { hex: tx1Serialized.hex, txid: tx1Serialized.txid },
+        tx2: { hex: tx2Serialized.hex, txid: tx2Serialized.txid },
+        anchorAddress: xOnlyToP2TR(anchor.xOnlyPubKey, chain),
+        anchorTxo: `txo:${voucher.chain}:${tx2Serialized.txid}:0`,
+        newVoucher,
+        newVoucherUri: `txo:${voucher.chain}:${tx1Serialized.txid}:1?amount=${newVoucher.amount}&key=${voucher.key}`
+      };
+    }
+
+    // Keep simple single-TX builder for backwards compat / testing
+    async function buildTransaction(voucher, anchorAddress, anchorAmount = 546) {
+      const FEE = 200;
+      const voucherPubKey = secp256k1.getPublicKey(voucher.key, true);
+      const voucherXOnly = bytesToHex(voucherPubKey.slice(1));
+      const changeAmount = voucher.amount - anchorAmount - FEE;
+
+      if (changeAmount < 0) throw new Error('Insufficient funds');
+
+      const tx = {
+        version: 2,
+        inputs: [{
+          txid: voucher.txid,
+          vout: voucher.vout,
+          sequence: 0xfffffffd,
+          witness: []
+        }],
+        outputs: [
+          { value: anchorAmount, scriptPubKey: decodeP2TRAddress(anchorAddress) },
+          ...(changeAmount >= 546 ? [{ value: changeAmount, scriptPubKey: createP2TRScript(voucherXOnly) }] : [])
+        ],
+        locktime: 0
+      };
+
+      const prevouts = [{ value: voucher.amount, scriptPubKey: createP2TRScript(voucherXOnly) }];
+      const sighash = computeTaprootSighash(tx, 0, prevouts, 0x00);
+      tx.inputs[0].witness = [await schnorr.sign(sighash, voucher.key)];
+
+      const serialized = serializeTransaction(tx);
+
+      return { txHex: serialized.hex, txid: serialized.txid, changeAddress: xOnlyToP2TR(voucherXOnly, voucher.chain) };
+    }
+
+    // --- Decode P2TR Address ---
+    function decodeP2TRAddress(addr) {
+      // Decode bech32m address to get x-only pubkey
+      const decoded = bech32m.decode(addr);
+      const words = decoded.words.slice(1); // Remove witness version
+      const data = convertBits(words, 5, 8, false);
+      return concatBytes(new Uint8Array([0x51, 0x20]), new Uint8Array(data));
+    }
+
+    // --- Serialize Transaction ---
+    // For SegWit: returns { txHex, txid }
+    // txid is hash of legacy serialization (no witness)
+    // txHex is full serialization with witness (for broadcast)
+    function serializeTransaction(tx) {
+      // Legacy serialization (for txid) - no witness
+      let legacy = concatBytes(
+        writeUint32LE(tx.version)
+      );
+
+      // Inputs
+      legacy = concatBytes(legacy, writeVarInt(tx.inputs.length));
+      for (const inp of tx.inputs) {
+        legacy = concatBytes(
+          legacy,
+          reverseBytes(hexToBytes(inp.txid)),
+          writeUint32LE(inp.vout),
+          writeVarInt(0), // Empty scriptSig for SegWit
+          writeUint32LE(inp.sequence)
+        );
+      }
+
+      // Outputs
+      legacy = concatBytes(legacy, writeVarInt(tx.outputs.length));
+      for (const out of tx.outputs) {
+        legacy = concatBytes(
+          legacy,
+          writeUint64LE(out.value),
+          writeVarInt(out.scriptPubKey.length),
+          out.scriptPubKey
+        );
+      }
+
+      // Locktime
+      legacy = concatBytes(legacy, writeUint32LE(tx.locktime));
+
+      // Compute txid from legacy (no witness)
+      const txid = bytesToHex(reverseBytes(sha256(sha256(legacy))));
+
+      // Full serialization with witness (for broadcast)
+      let full = concatBytes(
+        writeUint32LE(tx.version),
+        new Uint8Array([0x00, 0x01]) // SegWit marker and flag
+      );
+
+      // Inputs
+      full = concatBytes(full, writeVarInt(tx.inputs.length));
+      for (const inp of tx.inputs) {
+        full = concatBytes(
+          full,
+          reverseBytes(hexToBytes(inp.txid)),
+          writeUint32LE(inp.vout),
+          writeVarInt(0),
+          writeUint32LE(inp.sequence)
+        );
+      }
+
+      // Outputs
+      full = concatBytes(full, writeVarInt(tx.outputs.length));
+      for (const out of tx.outputs) {
+        full = concatBytes(
+          full,
+          writeUint64LE(out.value),
+          writeVarInt(out.scriptPubKey.length),
+          out.scriptPubKey
+        );
+      }
+
+      // Witness data
+      for (const inp of tx.inputs) {
+        full = concatBytes(full, writeVarInt(inp.witness.length));
+        for (const wit of inp.witness) {
+          full = concatBytes(full, writeVarInt(wit.length), wit);
+        }
+      }
+
+      // Locktime
+      full = concatBytes(full, writeUint32LE(tx.locktime));
+
+      return { hex: bytesToHex(full), txid };
+    }
+
+    // --- Broadcast Transaction ---
+    async function broadcastTransaction(chain, txHex) {
+      if (USE_MOCK_TX) {
+        // Mock broadcast for testing
+        await new Promise(r => setTimeout(r, 1500));
+        return bytesToHex(sha256(new TextEncoder().encode(txHex + Date.now())));
+      }
+
+      // Real broadcast via mempool.space API
+      const apiBase = {
+        'tbtc4': 'https://mempool.space/testnet4/api',
+        'btc': 'https://mempool.space/api',
+        'ltc': 'https://litecoinspace.org/api'
+      }[chain];
+
+      if (!apiBase) throw new Error('Unsupported chain: ' + chain);
+
+      const res = await fetch(`${apiBase}/tx`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: txHex
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error('Broadcast failed: ' + err);
+      }
+
+      return res.text(); // Returns txid
+    }
+
+    // =============================================
+    // NOSTR HELPERS
+    // =============================================
+    const DEFAULT_RELAYS = [
+      'wss://nos.lol',
+      'wss://relay.primal.net',
+      'wss://purplepag.es',
+      'wss://relay.nostr.band'
+    ];
+
+    const BECH32_ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+
+    function bech32Decode(str) {
+      str = str.toLowerCase();
+      const sep = str.lastIndexOf('1');
+      const data = str.slice(sep + 1, -6);
+      const values = [];
+      for (const c of data) values.push(BECH32_ALPHABET.indexOf(c));
+      let acc = 0, bits = 0;
+      const bytes = [];
+      for (const v of values) {
+        acc = (acc << 5) | v;
+        bits += 5;
+        while (bits >= 8) { bits -= 8; bytes.push((acc >> bits) & 0xff); }
+      }
+      return new Uint8Array(bytes);
+    }
+
+    function parseTLV(data) {
+      const result = { relays: [] };
+      let i = 0;
+      while (i < data.length) {
+        const type = data[i++], len = data[i++];
+        const value = data.slice(i, i + len);
+        i += len;
+        if (type === 0) result.id = value;
+        if (type === 1) result.relays.push(new TextDecoder().decode(value));
+      }
+      return result;
+    }
+
+    function decodeNostrId(input) {
+      input = input.trim();
+      if (/^[a-f0-9]{64}$/i.test(input)) return { id: input, relays: [], type: 'note' };
+      if (input.startsWith('nostr:')) input = input.slice(6);
+      if (input.startsWith('note1')) return { id: bytesToHex(bech32Decode(input)), relays: [], type: 'note' };
+      if (input.startsWith('nevent1')) {
+        const tlv = parseTLV(bech32Decode(input));
+        return { id: bytesToHex(tlv.id), relays: tlv.relays || [], type: 'note' };
+      }
+      if (input.startsWith('npub1')) return { id: bytesToHex(bech32Decode(input)), relays: [], type: 'profile' };
+      if (input.startsWith('nprofile1')) {
+        const tlv = parseTLV(bech32Decode(input));
+        return { id: bytesToHex(tlv.id), relays: tlv.relays || [], type: 'profile' };
+      }
+      throw new Error('Use npub1, note1, or nevent1');
+    }
+
+    function decodeNsec(nsec) {
+      if (nsec.startsWith('nsec1')) return bytesToHex(bech32Decode(nsec));
+      if (/^[a-f0-9]{64}$/i.test(nsec)) return nsec.toLowerCase();
+      throw new Error('Invalid key format');
+    }
+
+    function getPublicKeyFromPrivate(privateKeyHex) {
+      const pubKey = secp256k1.getPublicKey(privateKeyHex, true);
+      return bytesToHex(pubKey.slice(1));
+    }
+
+    async function fetchFromRelays(filter, relays = DEFAULT_RELAYS) {
+      return new Promise((resolve, reject) => {
+        let resolved = false;
+        const sockets = [];
+        const cleanup = () => sockets.forEach(ws => { try { ws.close(); } catch (e) {} });
+        const timeout = setTimeout(() => {
+          if (!resolved) { resolved = true; cleanup(); reject(new Error('Timeout')); }
+        }, 8000);
+        for (const relay of relays) {
+          try {
+            const ws = new WebSocket(relay);
+            sockets.push(ws);
+            ws.onopen = () => ws.send(JSON.stringify(['REQ', Math.random().toString(36).slice(2), filter]));
+            ws.onmessage = (e) => {
+              try {
+                const msg = JSON.parse(e.data);
+                if (msg[0] === 'EVENT' && msg[2] && !resolved) {
+                  resolved = true; clearTimeout(timeout); cleanup(); resolve(msg[2]);
+                }
+              } catch (err) {}
+            };
+          } catch (e) {}
+        }
+      });
+    }
+
+    function computeEventHash(event) {
+      const canonical = JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]);
+      return bytesToHex(sha256(new TextEncoder().encode(canonical)));
+    }
+
+    // =============================================
+    // NOSTR EVENT PUBLISHING (Kind 30078 - Parameterized Replaceable)
+    // =============================================
+    const IMMORTALIZE_KIND = 30078;
+
+    async function createAndSignEvent(privateKey, kind, content, tags) {
+      const pubkey = bytesToHex(secp256k1.getPublicKey(privateKey, true).slice(1));
+      const event = {
+        pubkey,
+        created_at: Math.floor(Date.now() / 1000),
+        kind,
+        tags,
+        content: typeof content === 'string' ? content : JSON.stringify(content)
+      };
+      event.id = computeEventHash(event);
+      event.sig = bytesToHex(await schnorr.sign(event.id, privateKey));
+      return event;
+    }
+
+    async function publishEvent(event, relays = DEFAULT_RELAYS) {
+      const results = [];
+      for (const relay of relays) {
+        try {
+          const ws = new WebSocket(relay);
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => { ws.close(); reject(new Error('Timeout')); }, 5000);
+            ws.onopen = () => {
+              ws.send(JSON.stringify(['EVENT', event]));
+            };
+            ws.onmessage = (e) => {
+              const msg = JSON.parse(e.data);
+              if (msg[0] === 'OK' && msg[1] === event.id) {
+                clearTimeout(timeout);
+                results.push({ relay, success: msg[2] });
+                ws.close();
+                resolve();
+              }
+            };
+            ws.onerror = () => { clearTimeout(timeout); reject(new Error('Connection failed')); };
+          });
+        } catch (e) {
+          results.push({ relay, success: false, error: e.message });
+        }
+      }
+      return results;
+    }
+
+    async function fetchRecentImmortalized(limit = 5) {
+      return new Promise((resolve) => {
+        const events = [];
+        const seen = new Set();
+        let resolved = false;
+        const sockets = [];
+        const cleanup = () => { sockets.forEach(ws => { try { ws.close(); } catch (e) {} }); };
+
+        const timeout = setTimeout(() => {
+          if (!resolved) { resolved = true; cleanup(); resolve(events); }
+        }, 5000);
+
+        for (const relay of DEFAULT_RELAYS) {
+          try {
+            const ws = new WebSocket(relay);
+            sockets.push(ws);
+            // Filter by kind AND our #t tag
+            ws.onopen = () => ws.send(JSON.stringify(['REQ', 'immortalized', {
+              kinds: [IMMORTALIZE_KIND],
+              '#t': ['immortalize'],
+              limit: limit * 2
+            }]));
+            ws.onmessage = (e) => {
+              try {
+                const msg = JSON.parse(e.data);
+                if (msg[0] === 'EVENT' && msg[2] && !seen.has(msg[2].id)) {
+                  // Double-check it has our tag
+                  const hasTag = msg[2].tags?.some(t => t[0] === 't' && t[1] === 'immortalize');
+                  if (hasTag) {
+                    seen.add(msg[2].id);
+                    events.push(msg[2]);
+                  }
+                }
+                if (msg[0] === 'EOSE') {
+                  if (!resolved && events.length > 0) {
+                    resolved = true; clearTimeout(timeout); cleanup();
+                    resolve(events.sort((a, b) => b.created_at - a.created_at).slice(0, limit));
+                  }
+                }
+              } catch (err) {}
+            };
+          } catch (e) {}
+        }
+      });
+    }
+
+    function truncate(str, len = 16) {
+      if (!str || str.length <= len) return str;
+      return str.slice(0, len / 2) + '...' + str.slice(-len / 2);
+    }
+
+    function timeAgo(ts) {
+      const s = Math.floor(Date.now() / 1000 - ts);
+      if (s < 60) return 'just now';
+      if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+      if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+      return new Date(ts * 1000).toLocaleDateString();
+    }
+
+    function getInitials(str) {
+      if (!str) return '?';
+      return str.slice(0, 2).toUpperCase();
+    }
+
+    function createConfetti() {
+      const colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
+      const container = document.createElement('div');
+      container.className = 'confetti';
+      document.body.appendChild(container);
+      for (let i = 0; i < 50; i++) {
+        const el = document.createElement('div');
+        el.style.cssText = `position:absolute;width:10px;height:10px;background:${colors[Math.floor(Math.random() * colors.length)]};left:${Math.random() * 100}%;top:-10px;border-radius:${Math.random() > 0.5 ? '50%' : '0'};animation:fall ${2 + Math.random() * 2}s linear forwards`;
+        container.appendChild(el);
+      }
+      const style = document.createElement('style');
+      style.textContent = `@keyframes fall{to{transform:translateY(100vh) rotate(720deg);opacity:0}}`;
+      document.head.appendChild(style);
+      setTimeout(() => container.remove(), 4000);
+    }
+
+    // =============================================
+    // APP
+    // =============================================
+    function App() {
+      const [mode, setMode] = useState('profile');
+      const [input, setInput] = useState('');
+      const [chain, setChain] = useState('testnet4');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState(null);
+      const [data, setData] = useState(null); // profile or note event
+      const [dataHash, setDataHash] = useState(null);
+      const [anchorAddress, setAnchorAddress] = useState(null);
+      const [status, setStatus] = useState(null); // null | 'preview' | 'confirming' | 'done'
+      const [proof, setProof] = useState(null);
+      const [showDetails, setShowDetails] = useState(false);
+      const [showLogin, setShowLogin] = useState(false);
+      const [loginTab, setLoginTab] = useState('extension');
+      const [nsecInput, setNsecInput] = useState('');
+      const [privateKey, setPrivateKey] = useState(null);
+      const [publicKey, setPublicKey] = useState(null);
+      const [recent, setRecent] = useState([]);
+
+      // Faucet state
+      const [faucetKey, setFaucetKey] = useState(null);
+      const [faucetAddress, setFaucetAddress] = useState(null);
+      const [faucetBalance, setFaucetBalance] = useState(0);
+      const [faucetUTXOs, setFaucetUTXOs] = useState([]);
+      const [faucetLoading, setFaucetLoading] = useState(true);
+
+      // Recently immortalized (from Nostr)
+      const [recentlyImmortalized, setRecentlyImmortalized] = useState([]);
+
+      useEffect(() => {
+        try {
+          const saved = localStorage.getItem('immortalize_recent');
+          if (saved) setRecent(JSON.parse(saved));
+          const pk = sessionStorage.getItem('immortalize_pubkey');
+          const sk = sessionStorage.getItem('immortalize_privkey');
+          if (pk) setPublicKey(pk);
+          if (sk) setPrivateKey(sk);
+        } catch (e) {}
+
+        // Initialize faucet
+        const key = getFaucetKey();
+        setFaucetKey(key);
+
+        // Fetch recently immortalized from Nostr, then fetch their profiles
+        fetchRecentImmortalized(10).then(async (events) => {
+          const parsed = events.map(e => {
+            try {
+              const content = JSON.parse(e.content);
+              const dTag = e.tags?.find(t => t[0] === 'd')?.[1];
+              // For notes: use noteAuthor if available, else fall back to dTag (immortalizer) or event pubkey
+              const pubkey = content.type === 'note'
+                ? (content.noteAuthor || dTag || e.pubkey)
+                : (dTag || e.pubkey);
+              return {
+                ...content,
+                pubkey,
+                noteAuthor: content.noteAuthor || pubkey, // Ensure noteAuthor is always set for notes
+                authorPubkey: e.pubkey,
+                eventId: e.id,
+                created_at: e.created_at
+              };
+            } catch { return null; }
+          }).filter(Boolean);
+
+          // Dedupe: profiles by pubkey, notes by noteId (or eventId for old events)
+          const byKey = {};
+          for (const item of parsed) {
+            const key = item.type === 'note'
+              ? ('note:' + (item.noteId || item.eventId))
+              : ('profile:' + item.pubkey);
+            if (!byKey[key] || item.created_at > byKey[key].created_at) {
+              byKey[key] = item;
+            }
+          }
+          const deduped = Object.values(byKey).sort((a, b) => b.created_at - a.created_at);
+
+          // Fetch profiles for profile items and note authors
+          const profiles = {};
+          const pubkeysToFetch = [...new Set(deduped.slice(0, 5).map(item =>
+            item.type === 'note' ? item.noteAuthor : item.pubkey
+          ).filter(Boolean))];
+          await Promise.all(pubkeysToFetch.map(async (pk) => {
+            try {
+              const profile = await fetchFromRelays({ kinds: [0], authors: [pk], limit: 1 });
+              if (profile) {
+                const data = JSON.parse(profile.content || '{}');
+                profiles[pk] = { name: data.name, picture: data.picture };
+              }
+            } catch {}
+          }));
+
+          // Merge profile data
+          const withProfiles = deduped.map(item => ({
+            ...item,
+            profileName: profiles[item.type === 'note' ? item.noteAuthor : item.pubkey]?.name || item.name,
+            profilePicture: profiles[item.type === 'note' ? item.noteAuthor : item.pubkey]?.picture
+          }));
+
+          setRecentlyImmortalized(withProfiles);
+        });
+      }, []);
+
+      // Update faucet address when key or chain changes
+      useEffect(() => {
+        if (faucetKey) {
+          const chainId = chain === 'testnet4' ? 'tbtc4' : chain;
+          setFaucetAddress(getFaucetAddress(faucetKey, chainId));
+        }
+      }, [faucetKey, chain]);
+
+      // Check faucet balance
+      const checkFaucet = async () => {
+        if (!faucetAddress) return;
+        setFaucetLoading(true);
+        const chainId = chain === 'testnet4' ? 'tbtc4' : chain;
+        const utxos = await checkFaucetUTXOs(faucetAddress, chainId);
+        setFaucetUTXOs(utxos);
+        setFaucetBalance(utxos.reduce((sum, u) => sum + u.amount, 0));
+        setFaucetLoading(false);
+      };
+
+      // Check faucet on address change and periodically
+      useEffect(() => {
+        if (faucetAddress) {
+          checkFaucet();
+          const interval = setInterval(checkFaucet, 15000); // Check every 15s
+          return () => clearInterval(interval);
+        }
+      }, [faucetAddress]);
+
+      const saveRecent = (item) => {
+        const updated = [item, ...recent.filter(r => r.txo !== item.txo)].slice(0, 5);
+        setRecent(updated);
+        localStorage.setItem('immortalize_recent', JSON.stringify(updated));
+      };
+
+      const handleExtensionLogin = async () => {
+        if (!window.nostr) return setError('No Nostr extension found. Try Alby or nos2x.');
+        try {
+          const pk = await window.nostr.getPublicKey();
+          setPublicKey(pk);
+          sessionStorage.setItem('immortalize_pubkey', pk);
+          setShowLogin(false);
+        } catch (e) { setError('Connection rejected'); }
+      };
+
+      const handleNsecLogin = () => {
+        try {
+          const sk = decodeNsec(nsecInput);
+          const pk = getPublicKeyFromPrivate(sk);
+          setPrivateKey(sk);
+          setPublicKey(pk);
+          sessionStorage.setItem('immortalize_privkey', sk);
+          sessionStorage.setItem('immortalize_pubkey', pk);
+          setNsecInput('');
+          setShowLogin(false);
+        } catch (e) { setError('Invalid private key'); }
+      };
+
+      const handleLogout = () => {
+        setPrivateKey(null);
+        setPublicKey(null);
+        sessionStorage.clear();
+      };
+
+      const handleFetch = async () => {
+        const m = mode;
+        const val = input || (m === 'profile' && publicKey ? publicKey : '');
+        setError(null); setData(null); setDataHash(null); setAnchorAddress(null); setStatus(null); setProof(null);
+
+        if (!val.trim()) return setError(m === 'note' ? 'Enter a note ID' : 'Enter a pubkey or connect');
+
+        setLoading(true);
+        try {
+          const decoded = decodeNostrId(val);
+          const relays = [...(decoded.relays || []), ...DEFAULT_RELAYS];
+
+          let event;
+          if (m === 'profile' || decoded.type === 'profile') {
+            try {
+              event = await fetchFromRelays({ kinds: [0], authors: [decoded.id], limit: 1 }, relays);
+            } catch {
+              event = { pubkey: decoded.id, created_at: Math.floor(Date.now() / 1000), kind: 0, tags: [], content: '{}' };
+            }
+          } else {
+            event = await fetchFromRelays({ ids: [decoded.id] }, relays);
+          }
+
+          const hash = computeEventHash(event);
+          setData(event);
+          setDataHash(hash);
+
+          if (privateKey) {
+            const anchor = deriveAnchorKey(privateKey, hash);
+            setAnchorAddress(xOnlyToP2TR(anchor.xOnlyPubKey, chain));
+          }
+
+          setStatus('preview');
+        } catch (e) {
+          setError(e.message || 'Failed to fetch');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        if (dataHash && privateKey) {
+          const anchor = deriveAnchorKey(privateKey, dataHash);
+          setAnchorAddress(xOnlyToP2TR(anchor.xOnlyPubKey, chain));
+        }
+      }, [chain, dataHash, privateKey]);
+
+
+      const handleImmortalize = async () => {
+        if (!privateKey) return setShowLogin(true);
+
+        // Check faucet has funds
+        if (faucetBalance < 1000) {
+          setError('Insufficient funds. Send at least 1000 sats to your faucet address.');
+          return;
+        }
+
+        setStatus('confirming');
+
+        try {
+          const chainId = chain === 'testnet4' ? 'tbtc4' : chain;
+
+          // Use largest faucet UTXO as voucher
+          const sortedUTXOs = [...faucetUTXOs].sort((a, b) => b.amount - a.amount);
+          const voucher = utxoToVoucher(sortedUTXOs[0], chainId, faucetKey);
+
+          // Build 2-TX flow
+          const result = await buildImmortalizeTxs(
+            voucher,
+            publicKey,
+            privateKey,
+            dataHash,
+            chainId
+          );
+
+          // Broadcast TX1 first (voucher → genesis + new voucher)
+          const tx1id = await broadcastTransaction(chainId, result.tx1.hex);
+          console.log('TX1 broadcast:', tx1id);
+
+          // Small delay to let TX1 propagate
+          await new Promise(r => setTimeout(r, 1000));
+
+          // Broadcast TX2 (genesis → anchor)
+          const tx2id = await broadcastTransaction(chainId, result.tx2.hex);
+          console.log('TX2 broadcast:', tx2id);
+
+          const proofData = {
+            txo: result.anchorTxo,
+            tx1id: result.tx1.txid,
+            tx2id: result.tx2.txid,
+            anchorAddress: result.anchorAddress,
+            dataHash,
+            timestamp: Math.floor(Date.now() / 1000),
+            newVoucherUri: result.newVoucherUri
+          };
+
+          setProof(proofData);
+          setStatus('done');
+          createConfetti();
+
+          // Save proof to localStorage
+          saveRecent({
+            txo: proofData.txo,
+            type: mode,
+            name: mode === 'profile' ? (JSON.parse(data.content || '{}').name || 'Profile') : truncate(data.content, 30),
+            timestamp: proofData.timestamp,
+            pubkey: publicKey,
+            dataHash
+          });
+
+          // Publish to Nostr (kind 30078 parameterized replaceable)
+          try {
+            // For profiles: d tag = profile pubkey (dedupes by profile)
+            // For notes: d tag = note event ID (each note is unique)
+            const dTagValue = mode === 'profile' ? (data.pubkey || publicKey) : data.id;
+            const profileData = mode === 'profile' ? JSON.parse(data.content || '{}') : {};
+            const proofContent = {
+              type: mode,
+              txo: proofData.txo,
+              tx1: proofData.tx1id,
+              tx2: proofData.tx2id,
+              chain: chainId,
+              dataHash,
+              basePubkey: publicKey, // The pubkey used to create the anchor (logged-in user)
+              // Profile-specific
+              name: mode === 'profile' ? (profileData.name || null) : null,
+              // Note-specific
+              noteId: mode === 'note' ? data.id : null,
+              noteAuthor: mode === 'note' ? data.pubkey : null,
+              notePreview: mode === 'note' ? (data.content || '').slice(0, 100) : null
+            };
+            const tags = [
+              ['d', dTagValue], // Parameterized replaceable
+              ['t', 'immortalize'],
+              ['t', 'blocktrails'],
+              ['chain', chainId]
+            ];
+            const nostrEvent = await createAndSignEvent(privateKey, IMMORTALIZE_KIND, proofContent, tags);
+            const publishResults = await publishEvent(nostrEvent);
+            console.log('Published to Nostr:', nostrEvent.id, publishResults);
+
+            // Add to local list immediately (don't wait for relay round-trip)
+            setRecentlyImmortalized(prev => {
+              const newItem = {
+                ...proofContent,
+                pubkey: mode === 'profile' ? dTagValue : data.pubkey,
+                eventId: nostrEvent.id,
+                created_at: nostrEvent.created_at,
+                profileName: profileData.name,
+                profilePicture: profileData.picture
+              };
+              // Remove existing entry for same d tag, add new at top
+              const filtered = prev.filter(p =>
+                mode === 'profile'
+                  ? p.pubkey !== dTagValue
+                  : p.noteId !== data.id
+              );
+              return [newItem, ...filtered].slice(0, 5);
+            });
+          } catch (e) {
+            console.warn('Failed to publish to Nostr:', e);
+          }
+
+          // Refresh faucet state (new UTXO from change output)
+          setTimeout(checkFaucet, 2000);
+
+        } catch (e) {
+          console.error('Immortalize error:', e);
+          setError('Failed to anchor: ' + e.message);
+          setStatus('preview');
+        }
+      };
+
+      const reset = () => {
+        setInput(''); setData(null); setDataHash(null); setAnchorAddress(null);
+        setStatus(null); setProof(null); setError(null); setShowDetails(false);
+      };
+
+      const profileData = data?.kind === 0 ? JSON.parse(data.content || '{}') : null;
+
+      return html`
+        <div class="container">
+          <header>
+            <a href="/" class="logo"><div class="logo-icon">~</div> Immortalize</a>
+            <nav>
+              <a href="verify.html">Verify</a>
+              <a href="docs.html">Docs</a>
+              ${publicKey
+                ? html`<button class="connect-btn connected" onClick=${handleLogout}>${truncate(publicKey, 10)}</button>`
+                : html`<button class="connect-btn" onClick=${() => setShowLogin(true)}>Connect</button>`
+              }
+            </nav>
+          </header>
+
+          ${!status && html`
+            <div class="hero">
+              <h1>Prove it existed. Forever.</h1>
+              <p>Anchor your Nostr identity or notes to Bitcoin</p>
+              <span class="badge">TESTNET MODE</span>
+            </div>
+          `}
+
+          <div class="card">
+            ${!status && html`
+              <div class="tabs">
+                <button class="tab ${mode === 'profile' ? 'active' : ''}" onClick=${() => setMode('profile')}>Profile</button>
+                <button class="tab ${mode === 'note' ? 'active' : ''}" onClick=${() => setMode('note')}>Note</button>
+              </div>
+
+              ${publicKey && mode === 'profile' && !input && html`
+                <button class="quick-btn" onClick=${() => { setInput(publicKey); handleFetch(); }}>
+                  Immortalize My Profile
+                </button>
+                <div class="divider">or enter any pubkey</div>
+              `}
+
+              <input
+                type="text"
+                placeholder=${mode === 'profile' ? 'npub1...' : 'note1... or nevent1...'}
+                value=${input}
+                onInput=${e => setInput(e.target.value)}
+                onKeyDown=${e => e.key === 'Enter' && handleFetch()}
+              />
+
+              ${error && html`<div class="error">${error}</div>`}
+
+              <button class="btn btn-primary" onClick=${handleFetch} disabled=${loading}>
+                ${loading ? 'Loading...' : 'Continue'}
+              </button>
+            `}
+
+            ${status === 'preview' && html`
+              <div class="preview">
+                ${profileData ? html`
+                  <div class="preview-header">
+                    <div class="avatar">${getInitials(profileData.name || data.pubkey)}</div>
+                    <div>
+                      <div class="preview-name">${profileData.name || 'Anonymous'}</div>
+                      <div class="preview-handle">${truncate(data.pubkey, 20)}</div>
+                    </div>
+                  </div>
+                  ${profileData.about && html`<div class="preview-content">${profileData.about}</div>`}
+                ` : html`
+                  <div class="preview-header">
+                    <div class="avatar">${getInitials(data.pubkey)}</div>
+                    <div>
+                      <div class="preview-name">Note</div>
+                      <div class="preview-handle">${truncate(data.pubkey, 20)}</div>
+                    </div>
+                  </div>
+                  <div class="preview-content">${data.content}</div>
+                `}
+                <div class="preview-meta">${timeAgo(data.created_at)}</div>
+              </div>
+
+              <div class="explainer">
+                <strong>What happens next?</strong>
+                A cryptographic fingerprint of this ${mode === 'profile' ? 'profile' : 'note'} will be permanently recorded on Bitcoin. Anyone can verify it existed at this moment.
+              </div>
+
+              <div class="chains">
+                <div class="chain ${chain === 'testnet4' ? 'selected' : ''}" onClick=${() => setChain('testnet4')}>
+                  <div class="chain-name">tBTC4</div>
+                  <div class="chain-price">Testnet</div>
+                </div>
+                <div class="chain ${chain === 'btc' ? 'selected' : ''}" onClick=${() => setChain('btc')}>
+                  <div class="chain-name">BTC</div>
+                  <div class="chain-price">Mainnet</div>
+                </div>
+                <div class="chain ${chain === 'ltc' ? 'selected' : ''}" onClick=${() => setChain('ltc')}>
+                  <div class="chain-name">LTC</div>
+                  <div class="chain-price">Invite*</div>
+                </div>
+              </div>
+
+              <!-- Faucet Status -->
+              <div class="details" style="margin-bottom: 1rem; ${faucetBalance >= 1000 ? 'background: var(--success-light);' : 'background: var(--warning-light);'}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <span style="color: ${faucetBalance >= 1000 ? 'var(--success)' : '#92400e'};">
+                      ${faucetLoading ? 'Checking...' : faucetBalance >= 1000 ? `Funded: ${faucetBalance.toLocaleString()} sats` : 'Not funded'}
+                    </span>
+                  </div>
+                  <button onClick=${checkFaucet} style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--text-dim);">
+                    ↻ Refresh
+                  </button>
+                </div>
+                ${faucetBalance < 1000 && faucetAddress && html`
+                  <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.25rem;">Send ${chain === 'testnet4' ? 'tBTC4' : chain.toUpperCase()} to fund:</div>
+                    <div style="word-break: break-all; cursor: pointer;" onClick=${() => navigator.clipboard.writeText(faucetAddress)}>
+                      ${faucetAddress}
+                    </div>
+                    <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.25rem;">Click to copy • Min 1000 sats</div>
+                    ${chain === 'testnet4' && html`
+                      <a href="https://github.com/testnet4/awesome-testnet4?tab=readme-ov-file#faucets"
+                         target="_blank"
+                         style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: var(--primary);">
+                        Get free testnet4 coins →
+                      </a>
+                    `}
+                  </div>
+                `}
+              </div>
+
+              ${showDetails && html`
+                <div class="details">
+                  <div><span>Hash:</span> ${truncate(dataHash, 24)}</div>
+                  ${anchorAddress && html`<div><span>Anchor:</span> ${truncate(anchorAddress, 24)}</div>`}
+                  <div><span>UTXOs:</span> ${faucetUTXOs.length} available</div>
+                </div>
+              `}
+
+              <div class="detail-toggle" onClick=${() => setShowDetails(!showDetails)}>
+                ${showDetails ? '▲ Hide' : '▼ Show'} technical details
+              </div>
+
+              ${!privateKey && html`
+                <div class="warning">Connect with your Nostr key to create your unique anchor.</div>
+              `}
+
+              ${error && html`<div class="error">${error}</div>`}
+
+              <button class="btn btn-primary" onClick=${handleImmortalize} disabled=${!privateKey || faucetBalance < 1000 || faucetLoading}>
+                ${!privateKey ? 'Connect to Continue'
+                  : faucetLoading ? 'Checking funds...'
+                  : faucetBalance < 1000 ? 'Fund to Continue'
+                  : 'Immortalize'}
+              </button>
+              <button class="btn btn-secondary" onClick=${reset}>Cancel</button>
+            `}
+
+            ${status === 'confirming' && html`
+              <div class="loading">
+                <div class="spinner"></div>
+                <p>Anchoring to ${chain === 'btc' ? 'Bitcoin' : chain === 'ltc' ? 'Litecoin' : 'Bitcoin Testnet4'}...</p>
+              </div>
+            `}
+
+            ${status === 'done' && proof && html`
+              <div class="success-icon">✓</div>
+              <div class="success-title">Immortalized!</div>
+              <div class="success-sub">
+                ${mode === 'profile' ? 'Your profile' : 'This note'} is now permanently anchored.
+              </div>
+
+              <div class="proof-box">
+                <div class="proof-label">Proof URI (anchor output)</div>
+                ${proof.txo}
+              </div>
+
+              <div class="details" style="margin-bottom: 1rem;">
+                <div><span>TX1 (genesis):</span> <a href=${`${chain === 'btc' ? 'https://mempool.space' : chain === 'ltc' ? 'https://litecoinspace.org' : 'https://mempool.space/testnet4'}/tx/${proof.tx1id}`} target="_blank" style="color: var(--primary);">${truncate(proof.tx1id, 18)}</a></div>
+                <div><span>TX2 (anchor):</span> <a href=${`${chain === 'btc' ? 'https://mempool.space' : chain === 'ltc' ? 'https://litecoinspace.org' : 'https://mempool.space/testnet4'}/tx/${proof.tx2id}`} target="_blank" style="color: var(--primary);">${truncate(proof.tx2id, 18)}</a></div>
+                <div><span>Data hash:</span> ${truncate(proof.dataHash, 20)}</div>
+                ${proof.newVoucherUri && html`
+                  <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">
+                    <span>Voucher refreshed</span> - ${(() => {
+                      try { return parseVoucher(proof.newVoucherUri).amount + ' sats remaining'; }
+                      catch { return 'saved for next use'; }
+                    })()}
+                  </div>
+                `}
+              </div>
+
+              <button class="btn btn-primary" onClick=${() => navigator.clipboard.writeText(proof.txo)}>
+                Copy Proof URI
+              </button>
+              <a href=${`verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}`}
+                 class="btn btn-secondary"
+                 style="display: block; text-align: center; text-decoration: none; color: var(--text-secondary);">
+                Verify This Proof
+              </a>
+              <button class="btn btn-secondary" onClick=${() => {
+                const proofBundle = {
+                  type: mode,
+                  txo: proof.txo,
+                  tx1: proof.tx1id,
+                  tx2: proof.tx2id,
+                  pubkey: publicKey,
+                  dataHash: proof.dataHash,
+                  timestamp: proof.timestamp
+                };
+                navigator.clipboard.writeText(JSON.stringify(proofBundle, null, 2));
+              }}>
+                Copy Full Proof Bundle
+              </button>
+              <button class="btn btn-secondary" onClick=${reset}>
+                Immortalize Another
+              </button>
+            `}
+          </div>
+
+          ${!status && recentlyImmortalized.length > 0 && html`
+            <div class="card" style="padding: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em;">Recently Immortalized</div>
+                <button onClick=${() => {
+                  fetchRecentImmortalized(10).then(async (events) => {
+                    const parsed = events.map(e => {
+                      try {
+                        const content = JSON.parse(e.content);
+                        const dTag = e.tags?.find(t => t[0] === 'd')?.[1];
+                        const pubkey = content.type === 'note'
+                          ? (content.noteAuthor || dTag || e.pubkey)
+                          : (dTag || e.pubkey);
+                        return {
+                          ...content,
+                          pubkey,
+                          noteAuthor: content.noteAuthor || pubkey,
+                          authorPubkey: e.pubkey,
+                          eventId: e.id,
+                          created_at: e.created_at
+                        };
+                      } catch { return null; }
+                    }).filter(Boolean);
+                    // Dedupe: profiles by pubkey, notes by noteId (or eventId for old events)
+                    const byKey = {};
+                    for (const item of parsed) {
+                      const key = item.type === 'note'
+                        ? ('note:' + (item.noteId || item.eventId))
+                        : ('profile:' + item.pubkey);
+                      if (!byKey[key] || item.created_at > byKey[key].created_at) {
+                        byKey[key] = item;
+                      }
+                    }
+                    const deduped = Object.values(byKey).sort((a, b) => b.created_at - a.created_at);
+                    // Fetch profiles for profile items and note authors
+                    const profiles = {};
+                    const pubkeysToFetch = [...new Set(deduped.slice(0, 5).map(item =>
+                      item.type === 'note' ? item.noteAuthor : item.pubkey
+                    ).filter(Boolean))];
+                    await Promise.all(pubkeysToFetch.map(async (pk) => {
+                      try {
+                        const profile = await fetchFromRelays({ kinds: [0], authors: [pk], limit: 1 });
+                        if (profile) {
+                          const data = JSON.parse(profile.content || '{}');
+                          profiles[pk] = { name: data.name, picture: data.picture };
+                        }
+                      } catch {}
+                    }));
+                    setRecentlyImmortalized(deduped.map(item => ({
+                      ...item,
+                      profileName: profiles[item.type === 'note' ? item.noteAuthor : item.pubkey]?.name || item.name,
+                      profilePicture: profiles[item.type === 'note' ? item.noteAuthor : item.pubkey]?.picture
+                    })));
+                  });
+                }} style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.75rem;">↻ Refresh</button>
+              </div>
+              ${recentlyImmortalized.slice(0, 3).map((item, i) => html`
+                <a key=${item.eventId || i} href=${`verify.html?txo=${encodeURIComponent(item.txo)}&pubkey=${item.basePubkey || item.pubkey}&type=${item.type || 'profile'}${item.noteId ? '&noteId=' + encodeURIComponent(item.noteId) : ''}`}
+                   style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; text-decoration: none; color: var(--text); ${i < 2 ? 'border-bottom: 1px solid var(--border);' : ''}">
+                  ${item.type === 'note'
+                    ? html`<div style="width: 36px; height: 36px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem;">📝</div>`
+                    : item.profilePicture
+                      ? html`<img src=${item.profilePicture} style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" />`
+                      : html`<div class="avatar" style="width: 36px; height: 36px; font-size: 0.85rem;">${getInitials(item.profileName || item.pubkey)}</div>`
+                  }
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 500; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      ${item.type === 'note'
+                        ? (item.notePreview ? item.notePreview.slice(0, 40) + (item.notePreview.length > 40 ? '...' : '') : 'Note')
+                        : (item.profileName || truncate(item.pubkey, 16))
+                      }
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim);">
+                      ${item.type === 'note' ? 'Note · ' : ''}${item.chain || 'tbtc4'} · ${timeAgo(item.created_at)}
+                    </div>
+                  </div>
+                  <div style="color: var(--success); font-size: 1rem;" title="Verified on-chain">✓</div>
+                </a>
+              `)}
+            </div>
+          `}
+
+          <footer>
+            <a href="verify.html">Verify</a> · <a href="docs.html">Docs</a>
+            <div style="margin-top:0.5rem">Built on <a href="https://blocktrails.org" target="_blank">Blocktrails</a></div>
+          </footer>
+
+          ${showLogin && html`
+            <div class="modal-overlay" onClick=${e => e.target === e.currentTarget && setShowLogin(false)}>
+              <div class="modal">
+                <h2>Connect</h2>
+                <div class="modal-tabs">
+                  <button class="modal-tab ${loginTab === 'extension' ? 'active' : ''}" onClick=${() => setLoginTab('extension')}>Extension</button>
+                  <button class="modal-tab ${loginTab === 'nsec' ? 'active' : ''}" onClick=${() => setLoginTab('nsec')}>Private Key</button>
+                </div>
+
+                ${loginTab === 'extension' && html`
+                  <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem">
+                    Connect with Alby, nos2x, or another Nostr extension.
+                  </p>
+                  <button class="btn btn-primary" onClick=${handleExtensionLogin}>Connect Extension</button>
+                `}
+
+                ${loginTab === 'nsec' && html`
+                  <div class="warning">Your key stays in your browser. Never sent anywhere.</div>
+                  <input type="password" placeholder="nsec1... or hex" value=${nsecInput} onInput=${e => setNsecInput(e.target.value)} />
+                  <button class="btn btn-primary" onClick=${handleNsecLogin}>Connect</button>
+                `}
+
+                <button class="btn btn-secondary" onClick=${() => setShowLogin(false)}>Cancel</button>
+              </div>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    render(html`<${App} />`, document.getElementById('app'));
+  </script>
+</body>
+</html>
