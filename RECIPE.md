@@ -317,10 +317,10 @@ async function signTaprootInput(tx, inputIndex, privateKey, prevouts) {
 ```javascript
 function getApiBase(chain) {
   return {
-    'tbtc4': 'https://mempool.space/testnet4/api',
-    'btc': 'https://mempool.space/api',
+    'tbtc4': 'https://mempool.guide/testnet4/api',
+    'btc': 'https://mempool.guide/api',
     'ltc': 'https://litecoinspace.org/api'
-  }[chain] || 'https://mempool.space/testnet4/api';
+  }[chain] || 'https://mempool.guide/testnet4/api';
 }
 
 async function fetchUTXOs(address, chain) {
@@ -344,8 +344,8 @@ async function broadcastTx(txHex, chain) {
 
 function getExplorerUrl(chain, txid) {
   const base = {
-    'tbtc4': 'https://mempool.space/testnet4',
-    'btc': 'https://mempool.space',
+    'tbtc4': 'https://mempool.guide/testnet4',
+    'btc': 'https://mempool.guide',
     'ltc': 'https://litecoinspace.org'
   }[chain];
   return `${base}/tx/${txid}`;

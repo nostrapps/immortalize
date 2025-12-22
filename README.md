@@ -56,7 +56,7 @@ Proofs can be verified by:
 - [@noble/curves](https://github.com/paulmillr/noble-curves) - Cryptography
 - [@noble/hashes](https://github.com/paulmillr/noble-hashes) - Hashing
 - [Blocktrails](https://blocktrails.org) - Anchoring protocol
-- [Mempool.space API](https://mempool.space/docs/api) - Blockchain data
+- [Mempool.space API](https://mempool.guide/docs/api) - Blockchain data
 
 ## License
 

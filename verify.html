@@ -267,8 +267,8 @@
     // Fetch TX from mempool API
     async function fetchTx(chain, txid) {
       const apiBase = {
-        'tbtc4': 'https://mempool.space/testnet4/api',
-        'btc': 'https://mempool.space/api',
+        'tbtc4': 'https://mempool.guide/testnet4/api',
+        'btc': 'https://mempool.guide/api',
         'ltc': 'https://litecoinspace.org/api'
       }[chain];
 
@@ -361,10 +361,10 @@
 
     function getExplorerUrl(chain, txid) {
       const base = {
-        'tbtc4': 'https://mempool.space/testnet4',
-        'btc': 'https://mempool.space',
+        'tbtc4': 'https://mempool.guide/testnet4',
+        'btc': 'https://mempool.guide',
         'ltc': 'https://litecoinspace.org'
-      }[chain] || 'https://mempool.space/testnet4';
+      }[chain] || 'https://mempool.guide/testnet4';
       return `${base}/tx/${txid}`;
     }
 

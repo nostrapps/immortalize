@@ -462,10 +462,10 @@
     // Check for UTXOs at address via mempool API
     async function checkFaucetUTXOs(address, chain) {
       const apiBase = {
-        'tbtc4': 'https://mempool.space/testnet4/api',
-        'btc': 'https://mempool.space/api',
+        'tbtc4': 'https://mempool.guide/testnet4/api',
+        'btc': 'https://mempool.guide/api',
         'ltc': 'https://litecoinspace.org/api'
-      }[chain] || 'https://mempool.space/testnet4/api';
+      }[chain] || 'https://mempool.guide/testnet4/api';
 
       try {
         const res = await fetch(`${apiBase}/address/${address}/utxo`);
@@ -839,10 +839,10 @@
         return bytesToHex(sha256(new TextEncoder().encode(txHex + Date.now())));
       }
 
-      // Real broadcast via mempool.space API
+      // Real broadcast via mempool.guide API
       const apiBase = {
-        'tbtc4': 'https://mempool.space/testnet4/api',
-        'btc': 'https://mempool.space/api',
+        'tbtc4': 'https://mempool.guide/testnet4/api',
+        'btc': 'https://mempool.guide/api',
         'ltc': 'https://litecoinspace.org/api'
       }[chain];
 
@@ -1565,7 +1565,14 @@
                 type="text"
                 placeholder=${mode === 'profile' ? 'npub1...' : 'note1... or nevent1...'}
                 value=${input}
-                onInput=${e => setInput(e.target.value)}
+                onInput=${e => {
+                  const val = e.target.value.trim();
+                  setInput(val);
+                  // Auto-submit on 64 hex chars (pasted event ID)
+                  if (/^[a-f0-9]{64}$/i.test(val)) {
+                    setTimeout(() => handleFetch(), 0);
+                  }
+                }}
                 onKeyDown=${e => e.key === 'Enter' && handleFetch()}
               />
 
@@ -1701,8 +1708,8 @@
               </div>
 
               <div class="details" style="margin-bottom: 1rem;">
-                <div><span>TX1 (genesis):</span> <a href=${`${chain === 'btc' ? 'https://mempool.space' : chain === 'ltc' ? 'https://litecoinspace.org' : 'https://mempool.space/testnet4'}/tx/${proof.tx1id}`} target="_blank" style="color: var(--primary);">${truncate(proof.tx1id, 18)}</a></div>
-                <div><span>TX2 (anchor):</span> <a href=${`${chain === 'btc' ? 'https://mempool.space' : chain === 'ltc' ? 'https://litecoinspace.org' : 'https://mempool.space/testnet4'}/tx/${proof.tx2id}`} target="_blank" style="color: var(--primary);">${truncate(proof.tx2id, 18)}</a></div>
+                <div><span>TX1 (genesis):</span> <a href=${`${chain === 'btc' ? 'https://mempool.guide' : chain === 'ltc' ? 'https://litecoinspace.org' : 'https://mempool.guide/testnet4'}/tx/${proof.tx1id}`} target="_blank" style="color: var(--primary);">${truncate(proof.tx1id, 18)}</a></div>
+                <div><span>TX2 (anchor):</span> <a href=${`${chain === 'btc' ? 'https://mempool.guide' : chain === 'ltc' ? 'https://litecoinspace.org' : 'https://mempool.guide/testnet4'}/tx/${proof.tx2id}`} target="_blank" style="color: var(--primary);">${truncate(proof.tx2id, 18)}</a></div>
                 <div><span>Data hash:</span> ${truncate(proof.dataHash, 20)}</div>
                 ${proof.newVoucherUri && html`
                   <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border);">
