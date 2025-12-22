@@ -948,6 +948,18 @@
       return `https://nostr.eu/${encodeNpub(hexPubkey)}`;
     }
 
+    // Encode event ID as nevent (NIP-19 TLV format)
+    function encodeNevent(eventIdHex) {
+      // TLV: type 0 (special) = event id, length = 32, value = event id bytes
+      const eventIdBytes = hexToBytes(eventIdHex);
+      const tlv = new Uint8Array(1 + 1 + 32); // type + length + value
+      tlv[0] = 0; // type: special (event id)
+      tlv[1] = 32; // length
+      tlv.set(eventIdBytes, 2);
+      const words = bech32.toWords(tlv);
+      return bech32.encode('nevent', words, 1000);
+    }
+
     async function fetchFromRelays(filter, relays = DEFAULT_RELAYS) {
       return new Promise((resolve, reject) => {
         let resolved = false;
@@ -1143,6 +1155,7 @@
       const [shareText, setShareText] = useState('');
       const [sharing, setSharing] = useState(false);
       const [shared, setShared] = useState(false);
+      const [sharedEventId, setSharedEventId] = useState(null);
 
       useEffect(() => {
         try {
@@ -1500,6 +1513,7 @@
           }
 
           await publishEvent(signedEvent);
+          setSharedEventId(signedEvent.id);
           setShared(true);
           setShowShareModal(false);
         } catch (e) {
@@ -1703,9 +1717,18 @@
               <button class="btn btn-primary" onClick=${() => navigator.clipboard.writeText(proof.txo)}>
                 Copy Proof URI
               </button>
-              <button class="btn ${shared ? 'btn-success' : 'btn-primary'}" onClick=${openShareModal} disabled=${shared}>
-                ${shared ? '✓ Shared to Nostr' : 'Share to Nostr'}
-              </button>
+              ${shared && sharedEventId ? html`
+                <a href=${`https://nostr.rocks/notes/${encodeNevent(sharedEventId)}`}
+                   target="_blank"
+                   class="btn btn-success"
+                   style="display: block; text-align: center; text-decoration: none;">
+                  ✓ View on Nostr →
+                </a>
+              ` : html`
+                <button class="btn btn-primary" onClick=${openShareModal}>
+                  Share to Nostr
+                </button>
+              `}
               <a href=${`verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}`}
                  class="btn btn-secondary"
                  style="display: block; text-align: center; text-decoration: none; color: var(--text-secondary);">
