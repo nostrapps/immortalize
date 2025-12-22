@@ -1274,9 +1274,10 @@
         } catch (e) { setError('Connection rejected'); }
       };
 
-      const handleNsecLogin = () => {
+      const handleNsecLogin = (directValue) => {
         try {
-          const sk = decodeNsec(nsecInput);
+          const value = (typeof directValue === 'string') ? directValue : nsecInput;
+          const sk = decodeNsec(value);
           const pk = getPublicKeyFromPrivate(sk);
           setPrivateKey(sk);
           setPublicKey(pk);
@@ -1873,7 +1874,7 @@
                     setNsecInput(val);
                     // Auto-connect on 64 hex chars (pasted private key)
                     if (/^[a-f0-9]{64}$/i.test(val)) {
-                      setTimeout(() => handleNsecLogin(), 0);
+                      setTimeout(() => handleNsecLogin(val), 0);
                     }
                   }} />
                   <button class="btn btn-primary" onClick=${handleNsecLogin}>Connect</button>
