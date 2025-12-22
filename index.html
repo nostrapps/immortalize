@@ -1182,7 +1182,7 @@
 
           // Fetch profiles for profile items and note authors
           const profiles = {};
-          const pubkeysToFetch = [...new Set(deduped.slice(0, 5).map(item =>
+          const pubkeysToFetch = [...new Set(deduped.slice(0, 10).map(item =>
             item.type === 'note' ? item.noteAuthor : item.pubkey
           ).filter(Boolean))];
           await Promise.all(pubkeysToFetch.map(async (pk) => {
@@ -1235,7 +1235,7 @@
       }, [faucetAddress]);
 
       const saveRecent = (item) => {
-        const updated = [item, ...recent.filter(r => r.txo !== item.txo)].slice(0, 5);
+        const updated = [item, ...recent.filter(r => r.txo !== item.txo)].slice(0, 10);
         setRecent(updated);
         localStorage.setItem('immortalize_recent', JSON.stringify(updated));
       };
@@ -1426,7 +1426,7 @@
                   ? p.pubkey !== dTagValue
                   : p.noteId !== data.id
               );
-              return [newItem, ...filtered].slice(0, 5);
+              return [newItem, ...filtered].slice(0, 10);
             });
           } catch (e) {
             console.warn('Failed to publish to Nostr:', e);
@@ -1702,7 +1702,7 @@
                     const deduped = Object.values(byKey).sort((a, b) => b.created_at - a.created_at);
                     // Fetch profiles for profile items and note authors
                     const profiles = {};
-                    const pubkeysToFetch = [...new Set(deduped.slice(0, 5).map(item =>
+                    const pubkeysToFetch = [...new Set(deduped.slice(0, 10).map(item =>
                       item.type === 'note' ? item.noteAuthor : item.pubkey
                     ).filter(Boolean))];
                     await Promise.all(pubkeysToFetch.map(async (pk) => {
@@ -1722,9 +1722,9 @@
                   });
                 }} style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.75rem;">↻ Refresh</button>
               </div>
-              ${recentlyImmortalized.slice(0, 3).map((item, i) => html`
+              ${recentlyImmortalized.slice(0, 10).map((item, i) => html`
                 <a key=${item.eventId || i} href=${`verify.html?txo=${encodeURIComponent(item.txo)}&pubkey=${item.basePubkey || item.pubkey}&type=${item.type || 'profile'}${item.noteId ? '&noteId=' + encodeURIComponent(item.noteId) : ''}`}
-                   style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; text-decoration: none; color: var(--text); ${i < 2 ? 'border-bottom: 1px solid var(--border);' : ''}">
+                   style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; text-decoration: none; color: var(--text); ${i < recentlyImmortalized.length - 1 ? 'border-bottom: 1px solid var(--border);' : ''}">
                   ${item.type === 'note'
                     ? html`<div style="width: 36px; height: 36px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem;">📝</div>`
                     : item.profilePicture
