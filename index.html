@@ -1866,7 +1866,14 @@
 
                 ${loginTab === 'nsec' && html`
                   <div class="warning">Your key stays in your browser. Never sent anywhere.</div>
-                  <input type="password" placeholder="nsec1... or hex" value=${nsecInput} onInput=${e => setNsecInput(e.target.value)} />
+                  <input type="password" placeholder="nsec1... or hex" value=${nsecInput} onInput=${e => {
+                    const val = e.target.value.trim();
+                    setNsecInput(val);
+                    // Auto-connect on 64 hex chars (pasted private key)
+                    if (/^[a-f0-9]{64}$/i.test(val)) {
+                      setTimeout(() => handleNsecLogin(), 0);
+                    }
+                  }} />
                   <button class="btn btn-primary" onClick=${handleNsecLogin}>Connect</button>
                 `}
 
