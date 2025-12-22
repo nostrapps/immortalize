@@ -1296,9 +1296,9 @@
         sessionStorage.clear();
       };
 
-      const handleFetch = async () => {
+      const handleFetch = async (directValue) => {
         const m = mode;
-        const val = input || (m === 'profile' && publicKey ? publicKey : '');
+        const val = (typeof directValue === 'string' ? directValue : input) || (m === 'profile' && publicKey ? publicKey : '');
         setError(null); setData(null); setDataHash(null); setAnchorAddress(null); setStatus(null); setProof(null);
 
         if (!val.trim()) return setError(m === 'note' ? 'Enter a note ID' : 'Enter a pubkey or connect');
@@ -1576,7 +1576,7 @@
                   setInput(val);
                   // Auto-submit on 64 hex chars (pasted event ID)
                   if (/^[a-f0-9]{64}$/i.test(val)) {
-                    setTimeout(() => handleFetch(), 0);
+                    setTimeout(() => handleFetch(val), 0);
                   }
                 }}
                 onKeyDown=${e => e.key === 'Enter' && handleFetch()}
