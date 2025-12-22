@@ -188,9 +188,9 @@ function decodeNpub(npub) {
   throw new Error('Invalid pubkey');
 }
 
-// Format as DID
+// Format as DID (uses hex pubkey, not npub)
 function toDidNostr(hexPubkey) {
-  return `did:nostr:${encodeNpub(hexPubkey)}`;
+  return `did:nostr:${hexPubkey}`;
 }
 
 // Link to resolver

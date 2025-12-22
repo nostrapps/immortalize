@@ -938,9 +938,9 @@
       return bech32.encode('npub', words);
     }
 
-    // Format pubkey as did:nostr URI
+    // Format pubkey as did:nostr URI (uses hex pubkey, not npub)
     function toDidNostr(hexPubkey) {
-      return `did:nostr:${encodeNpub(hexPubkey)}`;
+      return `did:nostr:${hexPubkey}`;
     }
 
     // Get nostr.eu profile URL

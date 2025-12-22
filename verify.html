@@ -226,9 +226,9 @@
       return bech32.encode('npub', words);
     }
 
-    // Format pubkey as did:nostr URI
+    // Format pubkey as did:nostr URI (uses hex pubkey, not npub)
     function toDidNostr(hexPubkey) {
-      return `did:nostr:${encodeNpub(hexPubkey)}`;
+      return `did:nostr:${hexPubkey}`;
     }
 
     // Get nostr.eu profile URL
@@ -237,24 +237,35 @@
     }
 
     // Derive expected anchor pubkey from base pubkey + data hash
-    function deriveExpectedPubkey(basePubkeyHex, dataHash) {
+    // Returns array of possible x-only pubkeys (trying both y-parities)
+    function deriveExpectedPubkeys(basePubkeyHex, dataHash) {
       // Ensure we have x-only (32 bytes)
       const xOnly = basePubkeyHex.length === 66 ? basePubkeyHex.slice(2) : basePubkeyHex;
 
-      // Convert to point (add 02 prefix for even y)
-      const fullPubkey = '02' + xOnly;
-      const point = secp256k1.ProjectivePoint.fromHex(fullPubkey);
+      const results = [];
 
-      // Calculate tweak
-      const tweak = BigInt('0x' + dataHash) % CURVE_ORDER;
+      // Try both y-parities (02 = even, 03 = odd)
+      for (const prefix of ['02', '03']) {
+        try {
+          const fullPubkey = prefix + xOnly;
+          const point = secp256k1.ProjectivePoint.fromHex(fullPubkey);
 
-      // Tweak the point: P' = P + tweak*G
-      const tweakPoint = secp256k1.ProjectivePoint.BASE.multiply(tweak);
-      const newPoint = point.add(tweakPoint);
+          // Calculate tweak
+          const tweak = BigInt('0x' + dataHash) % CURVE_ORDER;
 
-      // Get x-only pubkey from result
-      const newPubkeyHex = newPoint.toHex(true); // compressed
-      return newPubkeyHex.slice(2); // x-only (remove prefix)
+          // Tweak the point: P' = P + tweak*G
+          const tweakPoint = secp256k1.ProjectivePoint.BASE.multiply(tweak);
+          const newPoint = point.add(tweakPoint);
+
+          // Get x-only pubkey from result
+          const newPubkeyHex = newPoint.toHex(true); // compressed
+          results.push(newPubkeyHex.slice(2)); // x-only (remove prefix)
+        } catch (e) {
+          // Invalid point for this parity, skip
+        }
+      }
+
+      return results;
     }
 
     // Parse TXO URI
@@ -473,18 +484,19 @@
             }
           }
 
-          // Derive expected pubkey
-          const expectedPubkey = deriveExpectedPubkey(basePubkey, dataHash);
+          // Derive expected pubkeys (try both y-parities)
+          const expectedPubkeys = deriveExpectedPubkeys(basePubkey, dataHash);
 
-          // Compare
-          const isValid = expectedPubkey.toLowerCase() === anchorPubkey.toLowerCase();
+          // Compare - valid if anchor matches any expected pubkey
+          const matchingPubkey = expectedPubkeys.find(exp => exp.toLowerCase() === anchorPubkey.toLowerCase());
+          const isValid = !!matchingPubkey;
 
           setResult({
             valid: isValid,
             txo,
             tx,
             anchorPubkey,
-            expectedPubkey,
+            expectedPubkey: matchingPubkey || expectedPubkeys[0],
             basePubkey,
             dataHash,
             event,
