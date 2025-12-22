@@ -1481,7 +1481,11 @@
       // Share to Nostr functions
       const getVerifyUrl = () => {
         if (!proof) return '';
-        return `https://nostrapps.github.io/immortalize/verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}`;
+        const base = `https://nostrapps.github.io/immortalize/verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}`;
+        if (mode === 'note' && data?.id) {
+          return `${base}&type=note&noteId=${encodeURIComponent(data.id)}`;
+        }
+        return base;
       };
 
       const getDefaultShareText = () => {
@@ -1742,7 +1746,7 @@
                   Share to Nostr
                 </button>
               `}
-              <a href=${`verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}`}
+              <a href=${`verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}${mode === 'note' && data?.id ? '&type=note&noteId=' + encodeURIComponent(data.id) : ''}`}
                  class="btn btn-secondary"
                  style="display: block; text-align: center; text-decoration: none; color: var(--text-secondary);">
                 Verify This Proof
