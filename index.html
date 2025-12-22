@@ -992,9 +992,9 @@
     }
 
     // =============================================
-    // NOSTR EVENT PUBLISHING (Kind 30078 - Parameterized Replaceable)
+    // NOSTR EVENT PUBLISHING (Kind 33444 - Social Proofs, NIP-334)
     // =============================================
-    const IMMORTALIZE_KIND = 30078;
+    const IMMORTALIZE_KIND = 33444;
 
     async function createAndSignEvent(privateKey, kind, content, tags) {
       const pubkey = bytesToHex(secp256k1.getPublicKey(privateKey, true).slice(1));
@@ -1403,7 +1403,7 @@
             dataHash
           });
 
-          // Publish to Nostr (kind 30078 parameterized replaceable)
+          // Publish to Nostr (kind 33444 - NIP-334 Social Proofs)
           try {
             // For profiles: d tag = profile pubkey (dedupes by profile)
             // For notes: d tag = note event ID (each note is unique)
@@ -1424,11 +1424,13 @@
               noteAuthor: mode === 'note' ? data.pubkey : null,
               notePreview: mode === 'note' ? (data.content || '').slice(0, 100) : null
             };
+            const anchoredPubkey = mode === 'profile' ? data.pubkey : data.pubkey;
             const tags = [
-              ['d', dTagValue], // Parameterized replaceable
-              ['t', 'immortalize'],
-              ['t', 'blocktrails'],
-              ['chain', chainId]
+              ['d', dTagValue], // Parameterized replaceable dedup key
+              ['p', anchoredPubkey], // Pubkey of identity being anchored
+              ['e', data.id], // Event ID of the anchored Nostr event
+              ['c', proofData.txo], // Commitment TXO URI
+              ['t', 'blocktrails']
             ];
             const nostrEvent = await createAndSignEvent(privateKey, IMMORTALIZE_KIND, proofContent, tags);
             const publishResults = await publishEvent(nostrEvent);

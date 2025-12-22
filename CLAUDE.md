@@ -48,22 +48,24 @@ Chains: `btc`, `tbtc4`, `ltc`
 - `serializeTransaction()` - Creates hex + computes txid (legacy serialization for txid)
 - `signTaprootInput()` - BIP341 Taproot signing with Schnorr
 - `tweakPubkey()` / `tweakPrivkey()` - Blocktrails key tweaking
-- `createAndSignEvent()` - Creates Nostr events (kind 30078)
+- `createAndSignEvent()` - Creates Nostr events (kind 33444)
 - `fetchRecentImmortalized()` - Fetches proof records from relays
 
 ### verify.html
 
-- `deriveExpectedPubkey()` - Computes expected anchor from base + hash
+- `deriveExpectedPubkeys()` - Computes expected anchor from base + hash (tries both y-parities)
 - `fetchTx()` - Gets transaction from mempool API
 - `computeEventHash()` - Canonical Nostr event hash
 
 ## Nostr Integration
 
-**Kind 30078** (Parameterized Replaceable) for proof records:
+**Kind 33444** (NIP-334 Social Proofs) for proof records:
 - `d` tag: profile pubkey (profiles) or note ID (notes)
-- `t` tags: `immortalize`, `blocktrails`
-- `chain` tag: chain ID
-- Content: JSON with txo, tx1, tx2, dataHash, basePubkey
+- `p` tag: pubkey of identity being anchored
+- `e` tag: event ID of anchored Nostr event
+- `c` tag: commitment TXO URI
+- `t` tag: `blocktrails`
+- Content: JSON with type, txo, tx1, tx2, dataHash, basePubkey
 
 **Relays**:
 ```javascript
