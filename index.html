@@ -1270,6 +1270,7 @@
           const pk = await window.nostr.getPublicKey();
           setPublicKey(pk);
           sessionStorage.setItem('immortalize_pubkey', pk);
+          if (mode === 'profile') setInput(pk);
           setShowLogin(false);
         } catch (e) { setError('Connection rejected'); }
       };
@@ -1283,6 +1284,7 @@
           setPublicKey(pk);
           sessionStorage.setItem('immortalize_privkey', sk);
           sessionStorage.setItem('immortalize_pubkey', pk);
+          if (mode === 'profile') setInput(pk);
           setNsecInput('');
           setShowLogin(false);
         } catch (e) { setError('Invalid private key'); }
