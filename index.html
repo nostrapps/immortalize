@@ -926,6 +926,23 @@
       return bytesToHex(pubKey.slice(1));
     }
 
+    // Encode hex pubkey to npub1...
+    function encodeNpub(hexPubkey) {
+      const bytes = hexToBytes(hexPubkey);
+      const words = bech32.toWords(bytes);
+      return bech32.encode('npub', words);
+    }
+
+    // Format pubkey as did:nostr URI
+    function toDidNostr(hexPubkey) {
+      return `did:nostr:${encodeNpub(hexPubkey)}`;
+    }
+
+    // Get nostr.eu profile URL
+    function getNostrProfileUrl(hexPubkey) {
+      return `https://nostr.eu/${encodeNpub(hexPubkey)}`;
+    }
+
     async function fetchFromRelays(filter, relays = DEFAULT_RELAYS) {
       return new Promise((resolve, reject) => {
         let resolved = false;
@@ -1490,7 +1507,9 @@
                     <div class="avatar">${getInitials(profileData.name || data.pubkey)}</div>
                     <div>
                       <div class="preview-name">${profileData.name || 'Anonymous'}</div>
-                      <div class="preview-handle">${truncate(data.pubkey, 20)}</div>
+                      <a class="preview-handle" href=${getNostrProfileUrl(data.pubkey)} target="_blank" style="color: var(--text-dim); text-decoration: none; font-size: 0.85rem;">
+                        ${truncate(toDidNostr(data.pubkey), 32)}
+                      </a>
                     </div>
                   </div>
                   ${profileData.about && html`<div class="preview-content">${profileData.about}</div>`}
@@ -1499,7 +1518,9 @@
                     <div class="avatar">${getInitials(data.pubkey)}</div>
                     <div>
                       <div class="preview-name">Note</div>
-                      <div class="preview-handle">${truncate(data.pubkey, 20)}</div>
+                      <a class="preview-handle" href=${getNostrProfileUrl(data.pubkey)} target="_blank" style="color: var(--text-dim); text-decoration: none; font-size: 0.85rem;">
+                        by ${truncate(toDidNostr(data.pubkey), 28)}
+                      </a>
                     </div>
                   </div>
                   <div class="preview-content">${data.content}</div>
@@ -1714,7 +1735,7 @@
                     <div style="font-weight: 500; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                       ${item.type === 'note'
                         ? (item.notePreview ? item.notePreview.slice(0, 40) + (item.notePreview.length > 40 ? '...' : '') : 'Note')
-                        : (item.profileName || truncate(item.pubkey, 16))
+                        : (item.profileName || truncate(toDidNostr(item.pubkey), 24))
                       }
                     </div>
                     <div style="font-size: 0.7rem; color: var(--text-dim);">

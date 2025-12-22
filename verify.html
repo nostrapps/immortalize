@@ -215,9 +215,26 @@
     import * as secp256k1 from 'https://esm.sh/@noble/secp256k1@2.1.0';
     import { sha256 } from 'https://esm.sh/@noble/hashes@1.4.0/sha256';
     import { bytesToHex, hexToBytes } from 'https://esm.sh/@noble/hashes@1.4.0/utils';
-    import { bech32m } from 'https://esm.sh/@scure/base@1.1.6';
+    import { bech32, bech32m } from 'https://esm.sh/@scure/base@1.1.6';
 
     const CURVE_ORDER = secp256k1.CURVE.n;
+
+    // Encode hex pubkey to npub1...
+    function encodeNpub(hexPubkey) {
+      const bytes = hexToBytes(hexPubkey);
+      const words = bech32.toWords(bytes);
+      return bech32.encode('npub', words);
+    }
+
+    // Format pubkey as did:nostr URI
+    function toDidNostr(hexPubkey) {
+      return `did:nostr:${encodeNpub(hexPubkey)}`;
+    }
+
+    // Get nostr.eu profile URL
+    function getNostrProfileUrl(hexPubkey) {
+      return `https://nostr.eu/${encodeNpub(hexPubkey)}`;
+    }
 
     // Derive expected anchor pubkey from base pubkey + data hash
     function deriveExpectedPubkey(basePubkeyHex, dataHash) {
@@ -577,7 +594,9 @@
                     <div class="avatar">${getInitials(profileData.name || result.basePubkey)}</div>
                     <div>
                       <div class="preview-name">${profileData.name || 'Anonymous'}</div>
-                      <div class="preview-handle">${truncate(result.basePubkey, 16)}</div>
+                      <a class="preview-handle" href=${getNostrProfileUrl(result.basePubkey)} target="_blank" style="color: var(--text-dim); text-decoration: none;">
+                        ${truncate(toDidNostr(result.basePubkey), 28)}
+                      </a>
                     </div>
                   </div>
                   ${profileData.about && html`<div class="preview-content">${profileData.about}</div>`}
@@ -590,7 +609,9 @@
                     <div style="width: 40px; height: 40px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📝</div>
                     <div>
                       <div class="preview-name">Note</div>
-                      <div class="preview-handle">by ${truncate(noteData.pubkey, 16)}</div>
+                      <a class="preview-handle" href=${getNostrProfileUrl(noteData.pubkey)} target="_blank" style="color: var(--text-dim); text-decoration: none;">
+                        by ${truncate(toDidNostr(noteData.pubkey), 24)}
+                      </a>
                     </div>
                   </div>
                   <div class="preview-content" style="white-space: pre-wrap; word-break: break-word;">${noteData.content}</div>
@@ -603,7 +624,7 @@
                 <div><span>TX:</span> <a href=${getExplorerUrl(result.txo.chain, result.txo.txid)} target="_blank" style="color: var(--primary);">${truncate(result.txo.txid, 18)}</a></div>
                 <div><span>Status:</span> ${result.confirmations}</div>
                 <div><span>Data Hash:</span> ${truncate(result.dataHash, 20)}</div>
-                <div><span>Base Pubkey:</span> ${truncate(result.basePubkey, 20)}</div>
+                <div><span>Base Pubkey:</span> <a href=${getNostrProfileUrl(result.basePubkey)} target="_blank" style="color: var(--primary);">${truncate(toDidNostr(result.basePubkey), 24)}</a></div>
                 <div><span>Anchor Pubkey:</span> ${truncate(result.anchorPubkey, 20)}</div>
                 <div><span>Expected:</span> ${truncate(result.expectedPubkey, 20)}</div>
                 ${!result.valid && html`
