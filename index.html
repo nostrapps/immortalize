@@ -1431,6 +1431,7 @@
               ['p', anchoredPubkey], // Pubkey of identity being anchored
               ['e', data.id], // Event ID of the anchored Nostr event
               ['c', proofData.txo], // Commitment TXO URI
+              ['t', 'immortalize'],
               ['t', 'blocktrails']
             ];
             const nostrEvent = await createAndSignEvent(privateKey, IMMORTALIZE_KIND, proofContent, tags);
