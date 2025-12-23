@@ -1420,9 +1420,10 @@
               chain: chainId,
               dataHash,
               basePubkey: publicKey, // The pubkey used to create the anchor (logged-in user)
+              eventId: data.id, // The anchored event ID (works for both profiles and notes)
               // Profile-specific
               name: mode === 'profile' ? (profileData.name || null) : null,
-              // Note-specific
+              // Note-specific (legacy, kept for backwards compat)
               noteId: mode === 'note' ? data.id : null,
               noteAuthor: mode === 'note' ? data.pubkey : null,
               notePreview: mode === 'note' ? (data.content || '').slice(0, 100) : null
@@ -1482,8 +1483,9 @@
       const getVerifyUrl = () => {
         if (!proof) return '';
         const base = `https://nostrapps.github.io/immortalize/verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}`;
-        if (mode === 'note' && data?.id) {
-          return `${base}&type=note&noteId=${encodeURIComponent(data.id)}`;
+        // Always include eventId to fetch the exact anchored event
+        if (data?.id) {
+          return `${base}&type=${mode}&eventId=${encodeURIComponent(data.id)}`;
         }
         return base;
       };
@@ -1746,7 +1748,7 @@
                   Share to Nostr
                 </button>
               `}
-              <a href=${`verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}${mode === 'note' && data?.id ? '&type=note&noteId=' + encodeURIComponent(data.id) : ''}`}
+              <a href=${`verify.html?txo=${encodeURIComponent(proof.txo)}&pubkey=${publicKey}${data?.id ? '&type=' + mode + '&eventId=' + encodeURIComponent(data.id) : ''}`}
                  class="btn btn-secondary"
                  style="display: block; text-align: center; text-decoration: none; color: var(--text-secondary);">
                 Verify This Proof
@@ -1828,7 +1830,7 @@
                 }} style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.75rem;">↻ Refresh</button>
               </div>
               ${recentlyImmortalized.slice(0, 10).map((item, i) => html`
-                <a key=${item.eventId || i} href=${`verify.html?txo=${encodeURIComponent(item.txo)}&pubkey=${item.basePubkey || item.pubkey}&type=${item.type || 'profile'}${item.noteId ? '&noteId=' + encodeURIComponent(item.noteId) : ''}`}
+                <a key=${item.eventId || i} href=${`verify.html?txo=${encodeURIComponent(item.txo)}&pubkey=${item.basePubkey || item.pubkey}&type=${item.type || 'profile'}${(item.eventId || item.noteId) ? '&eventId=' + encodeURIComponent(item.eventId || item.noteId) : ''}`}
                    style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; text-decoration: none; color: var(--text); ${i < recentlyImmortalized.length - 1 ? 'border-bottom: 1px solid var(--border);' : ''}">
                   ${item.type === 'note'
                     ? html`<div style="width: 36px; height: 36px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem;">📝</div>`

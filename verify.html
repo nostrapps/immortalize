@@ -389,7 +389,7 @@
       const [error, setError] = useState(null);
       const [result, setResult] = useState(null);
       const [verifyType, setVerifyType] = useState('profile'); // 'profile' or 'note'
-      const [noteIdInput, setNoteIdInput] = useState('');
+      const [eventIdInput, setEventIdInput] = useState('');
 
       const [autoVerifyReady, setAutoVerifyReady] = useState(false);
       const [urlType, setUrlType] = useState(null); // Track URL type for auto-verify
@@ -400,14 +400,14 @@
         const txo = params.get('txo');
         const pubkey = params.get('pubkey');
         const type = params.get('type');
-        const noteId = params.get('noteId');
+        const eventId = params.get('eventId') || params.get('noteId'); // Support both new and legacy param
         if (txo) setTxoInput(txo);
         if (pubkey) setPubkeyInput(pubkey);
         if (type) {
           setVerifyType(type);
           setUrlType(type);
         }
-        if (noteId) setNoteIdInput(noteId);
+        if (eventId) setEventIdInput(eventId);
         // Mark for auto-verify if params present
         if (txo && pubkey) setAutoVerifyReady(true);
       }, []);
@@ -415,15 +415,15 @@
       // Auto-verify after all state is set
       useEffect(() => {
         if (autoVerifyReady && txoInput && pubkeyInput && !loading && !result) {
-          // For notes, wait until noteIdInput is set (if URL had noteId)
+          // Wait until eventIdInput is set (if URL had eventId)
           const params = new URLSearchParams(window.location.search);
-          const urlNoteId = params.get('noteId');
-          if (urlType === 'note' && urlNoteId && !noteIdInput) return; // Wait for noteId to be set
+          const urlEventId = params.get('eventId') || params.get('noteId');
+          if (urlEventId && !eventIdInput) return; // Wait for eventId to be set
 
           setAutoVerifyReady(false);
           handleVerify();
         }
-      }, [autoVerifyReady, txoInput, pubkeyInput, verifyType, noteIdInput]);
+      }, [autoVerifyReady, txoInput, pubkeyInput, verifyType, eventIdInput]);
 
       const handleVerify = async () => {
         setError(null);
@@ -464,23 +464,22 @@
 
           // Fetch the Nostr event to get the data hash
           try {
-            if (verifyType === 'note') {
-              if (!noteIdInput) {
-                throw new Error('Note ID required for note verification. Old proofs may not have this data stored.');
-              }
-              // Fetch note by ID
-              event = await fetchFromRelays({ ids: [noteIdInput], limit: 1 });
-              if (!event) throw new Error('Note not found on relays');
+            if (eventIdInput) {
+              // Fetch specific event by ID (works for both profiles and notes)
+              event = await fetchFromRelays({ ids: [eventIdInput], limit: 1 });
+              if (!event) throw new Error('Event not found on relays');
               dataHash = computeEventHash(event);
+            } else if (verifyType === 'note') {
+              throw new Error('Event ID required for note verification. Old proofs may not have this data stored.');
             } else {
-              // Fetch profile by author
+              // Legacy fallback: fetch latest profile by author (may fail if profile updated)
               event = await fetchFromRelays({ kinds: [0], authors: [basePubkey], limit: 1 });
               dataHash = computeEventHash(event);
             }
           } catch (e) {
             // If we have dataHash from bundle, use that
             if (!dataHash) {
-              throw new Error(e.message || (verifyType === 'note' ? 'Could not fetch Nostr note' : 'Could not fetch Nostr profile to compute hash'));
+              throw new Error(e.message || 'Could not fetch Nostr event to compute hash');
             }
           }
 
