@@ -1186,7 +1186,8 @@
                 pubkey,
                 noteAuthor: content.noteAuthor || pubkey, // Ensure noteAuthor is always set for notes
                 authorPubkey: e.pubkey,
-                eventId: e.id,
+                proofEventId: e.id, // The kind 33444 proof event ID
+                eventId: content.eventId || e.id, // The anchored event ID (prefer from content, fallback to proof event for old proofs)
                 created_at: e.created_at
               };
             } catch { return null; }
@@ -1791,7 +1792,8 @@
                           pubkey,
                           noteAuthor: content.noteAuthor || pubkey,
                           authorPubkey: e.pubkey,
-                          eventId: e.id,
+                          proofEventId: e.id,
+                          eventId: content.eventId || e.id,
                           created_at: e.created_at
                         };
                       } catch { return null; }
